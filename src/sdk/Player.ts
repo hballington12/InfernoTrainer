@@ -396,9 +396,9 @@ export class Player extends Unit {
   }
 
   override playAttackSound() {
-    if (this.equipment.weapon?.attackSound) {
+    /*if (this.equipment.weapon?.attackSound) {
       SoundCache.play(this.equipment.weapon?.attackSound);
-    }
+    }*/
   }
 
   activatePrayers() {

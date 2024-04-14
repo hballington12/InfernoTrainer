@@ -7,6 +7,28 @@ import { PlayerAnimationIndices } from "../../sdk/rendering/GLTFAnimationConstan
 import { Sound } from "../../sdk/utils/SoundCache";
 
 import ScytheAttackSound from "../../assets/sounds/scythe_swing_2524.ogg";
+import { AttackBonuses } from "../../sdk/gear/Weapon";
+import { Unit } from "../../sdk/Unit";
+import { Collision } from "../../sdk/Collision";
+
+const EXTRA_HIT_LOCATIONS = [
+  [
+    [-1, -1],
+    [1, -1],
+  ], // North
+  [
+    [1, 1],
+    [1, -1],
+  ], // East
+  [
+    [-1, 1],
+    [1, 1],
+  ], // South
+  [
+    [-1, 1],
+    [-1, -1],
+  ], // West
+];
 
 export class ScytheOfVitur extends MeleeWeapon {
   constructor() {
@@ -75,7 +97,45 @@ export class ScytheOfVitur extends MeleeWeapon {
   get inventoryImage() {
     return ScytheInventImage;
   }
-  
+
+  override attack(from: Unit, to: Unit, bonuses: AttackBonuses) {
+    const region = from.region;
+    // As there is no concept of player direction yet, we dynamically calculate this based on the relative location of
+    // the attacker.
+    // Find the closest tile on the npc to us.
+    const targetTile = to.getClosestTileTo(from.location.x, from.location.y);
+    
+    const dx = from.location.x - targetTile[0];
+    const dy = from.location.y - targetTile[1];
+    let direction;
+    if (dx < 0) {
+      direction = 1; // East
+    } else if (dx > 0) {
+      direction = 3; // West
+    } else if (dy < 0) {
+      direction = 2; // South
+    } else {
+      direction = 0; // North
+    }
+    // Full damage attack, but each subsequent hit does half of the last.
+    let multiplier = 1.0;
+    super.attack(from, to, bonuses);
+    EXTRA_HIT_LOCATIONS[direction].forEach((hit) => {
+      const xx = from.location.x + hit[0];
+      const yy = from.location.y + hit[1];
+      const collision = Collision.collidesWithAnyMobs(region, xx, yy, from.size);
+      if (collision) {
+        multiplier *= 0.5;
+        const extraHitBonuses = {
+          ...bonuses,
+          overallMultipler: multiplier,
+        };
+        super.attack(from, collision, extraHitBonuses);
+      }
+    });
+    return true;
+  }
+
   override get model() {
     return Assets.getAssetUrl("models/player_sanguine_scythe_of_vitur.glb");
   }
