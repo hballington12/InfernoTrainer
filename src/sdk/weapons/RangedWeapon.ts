@@ -3,6 +3,7 @@ import { XpDrop } from "../XpDrop";
 import { Projectile, ProjectileOptions } from "./Projectile";
 import { AttackBonuses, Weapon } from "../gear/Weapon";
 import { EquipmentTypes } from "../Equipment";
+import { AttackStylesController } from "../AttackStylesController";
 
 export class RangedWeapon extends Weapon {
   get type() {
@@ -19,10 +20,11 @@ export class RangedWeapon extends Weapon {
     );
   }
 
-  grantXp(from: Unit) {
+  grantXp(from: Unit, to: Unit) {
     if (from.type === UnitTypes.PLAYER && this.damage > 0) {
-      from.grantXp(new XpDrop("hitpoint", this.damage * 1.33));
-      from.grantXp(new XpDrop("range", this.damage * 4));
+      AttackStylesController.controller.getWeaponXpDrops(this.attackStyle(), this.damage, to.xpBonusMultiplier).forEach(({skill, xp}) => {
+        from.grantXp(new XpDrop(skill, xp));
+      });
     }
   }
 

@@ -32,14 +32,6 @@ import HumanHit from "../assets/sounds/human_hit_513.ogg";
 import { Model } from "./rendering/Model";
 import { TileMarker } from "../content/TileMarker";
 
-import SlayerHelmetModel from "../assets/models/male_Tzkal_slayer helmet (i).gltf";
-import TwistedBowModel from "../assets/models/male_Twisted_bow.gltf";
-import ToxicBlowpipeModel from "../assets/models/male_Toxic_blowpipe.gltf";
-import MasoriBodyModel from "../assets/models/male_Masori_body (f).gltf";
-import MasoriChapsModel from "../assets/models/male_Masori_chaps (f).gltf";
-import PegasianBootsModel from "../assets/models/male_Pegasian_boots.gltf";
-import DizanasMaxCapeModel from "../assets/models/male_Dizana's_max cape.gltf";
-
 import { GLTFModel } from "./rendering/GLTFModel";
 import { PlayerAnimationIndices } from "./rendering/GLTFAnimationConstants";
 
@@ -56,7 +48,6 @@ const PLAYER_ROTATION_RATE_JAU = 64;
 const CLIENT_TICKS_PER_SECOND = 50;
 const JAU_PER_RADIAN = 512;
 const RADIANS_PER_TICK = ((CLIENT_TICKS_PER_SECOND * PLAYER_ROTATION_RATE_JAU) / JAU_PER_RADIAN) * 0.6;
-const LOCAL_POINTS_PER_CELL = 128;
 
 const ENABLE_POSITION_DEBUG = false;
 
@@ -248,6 +239,9 @@ export class Player extends Unit {
     });
     this.setEffects = completeSetEffects;
 
+    if (this.path.length === 0) {
+      this.currentPoseAnimation = this.getIdlePoseId();
+    }
     this.invalidateModel();
   }
 
@@ -520,6 +514,10 @@ export class Player extends Unit {
     }
   }
 
+  private getIdlePoseId() {
+    return this.equipment.weapon ? this.equipment.weapon.idleAnimationId : PlayerAnimationIndices.Idle;
+  }
+
   clientTick(tickPercent) {
     // based on https://github.com/dennisdev/rs-map-viewer/blob/master/src/mapviewer/webgl/npc/Npc.ts#L115
     if (this.path.length === 0) {
@@ -583,7 +581,7 @@ export class Player extends Unit {
         this.region.removeEntity(headTile);
       }
       if (this.path.length === 0) {
-        this.currentPoseAnimation = PlayerAnimationIndices.Idle;
+        this.currentPoseAnimation = this.getIdlePoseId();
         this.restingAngle = this.nextAngle;
       } else {
         this.nextAngle = this.getTargetAngle();

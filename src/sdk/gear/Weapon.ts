@@ -12,6 +12,7 @@ import { ItemName } from "../ItemName";
 import { AttackStylesController, AttackStyle, AttackStyleTypes } from "../AttackStylesController";
 import { Random } from "../Random";
 import { Sound, SoundCache } from "../utils/SoundCache";
+import { PlayerAnimationIndices } from "../rendering/GLTFAnimationConstants";
 
 interface EffectivePrayers {
   magic?: BasePrayer;
@@ -179,7 +180,7 @@ export class Weapon extends Equipment {
       );
     }
 
-    this.grantXp(from);
+    this.grantXp(from, to);
     this.registerProjectile(from, to, bonuses);
     return true;
   }
@@ -216,7 +217,7 @@ export class Weapon extends Equipment {
     return false; // weapons implement this at the type tier
   }
 
-  grantXp(from: Unit) {
+  grantXp(from: Unit, to: Unit) {
     // weapons implement this at the type tier
   }
 
@@ -280,5 +281,9 @@ export class Weapon extends Equipment {
 
   get attackLandingSound(): Sound | null {
     return null;
+  }
+
+  get idleAnimationId() {
+    return PlayerAnimationIndices.Idle;
   }
 }

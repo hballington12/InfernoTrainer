@@ -1,3 +1,4 @@
+import { AttackStylesController } from "../AttackStylesController";
 import { EquipmentTypes } from "../Equipment";
 import { Weapon, AttackBonuses } from "../gear/Weapon";
 import { Unit, UnitTypes } from "../Unit";
@@ -13,10 +14,11 @@ export class MeleeWeapon extends Weapon {
     return super.attack(from, to, bonuses);
   }
 
-  grantXp(from: Unit) {
+  grantXp(from: Unit, to: Unit) {
     if (from.type === UnitTypes.PLAYER && this.damage > 0) {
-      from.grantXp(new XpDrop("hitpoint", this.damage * 1.33));
-      from.grantXp(new XpDrop("attack", this.damage * 4));
+      AttackStylesController.controller.getWeaponXpDrops(this.attackStyle(), this.damage, to.xpBonusMultiplier).forEach(({skill, xp}) => {
+        from.grantXp(new XpDrop(skill, xp));
+      });
     }
   }
 

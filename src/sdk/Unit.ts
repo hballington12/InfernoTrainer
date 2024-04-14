@@ -729,4 +729,9 @@ export abstract class Unit extends Renderable {
   get attackAnimationId(): number | null {
     return null;
   }
+
+  get xpBonusMultiplier() {
+    return 1.0;
+  }
 }
+

@@ -135,8 +135,12 @@ export class Projectile extends Renderable {
     }
   }
 
+  private isMeleeStyle() {
+    return (this.attackStyle === "slash" || this.attackStyle === "crush" || this.attackStyle === "stab");
+  }
+
   private getColor() {
-    if (this.attackStyle === "slash" || this.attackStyle === "crush" || this.attackStyle === "stab") {
+    if (this.isMeleeStyle()) {
       return "#FF0000";
     } else if (this.attackStyle === "range") {
       return "#00FF00";
@@ -173,7 +177,7 @@ export class Projectile extends Renderable {
   }
 
   get visible() {
-    return this.age >= this.visualDelayTicks && this.age < this.totalDelay;
+    return !this.isMeleeStyle() && this.age >= this.visualDelayTicks && this.age < this.totalDelay;
   }
 
   getPerceivedLocation(tickPercent: number) {

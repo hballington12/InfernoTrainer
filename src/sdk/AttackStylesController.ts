@@ -62,8 +62,9 @@ export enum AttackStyle {
   ACCURATE = "ACCURATE",
   RAPID = "RAPID",
   LONGRANGE = "LONGRANGE",
-  AGGRESSIVECRUSH = "Aggr (Crush)",
-  AGGRESSIVESLASH = "Aggr (Slash)",
+  REAP = "REAP",
+  AGGRESSIVECRUSH = "AGGRESSIVE (CRUSH)",
+  AGGRESSIVESLASH = "AGGRESSIVE (SLASH)",
   DEFENSIVE = "DEFENSIVE",
   CONTROLLED = "CONTROLLED",
   AUTOCAST = "AUTOCAST",
@@ -108,7 +109,7 @@ export class AttackStylesController {
       [AttackStyle.LONGRANGE]: ImageLoader.createImage(ThrownLongrangeImage),
     },
     [AttackStyleTypes.SCYTHE]: {
-      [AttackStyle.ACCURATE]: ImageLoader.createImage(ScytheAccurateImage),
+      [AttackStyle.REAP]: ImageLoader.createImage(ScytheAccurateImage),
       [AttackStyle.AGGRESSIVESLASH]: ImageLoader.createImage(ScytheAggressiveSlashImage),
       [AttackStyle.AGGRESSIVECRUSH]: ImageLoader.createImage(ScytheAggressiveCrushImage),
       [AttackStyle.DEFENSIVE]: ImageLoader.createImage(ScytheDefensiveImage),
@@ -119,6 +120,24 @@ export class AttackStylesController {
       [AttackStyle.LONG_FUSE]: ImageLoader.createImage(ChinchompaLongFuseImage),
     },
   };
+
+  static attackStyleXpType: Record<AttackStyle, string[]> = {
+    [AttackStyle.ACCURATE]: ["range"],
+    [AttackStyle.RAPID]: ["range"],
+    // TODO: defence here
+    [AttackStyle.LONGRANGE]: ["range"],
+    [AttackStyle.REAP]: ["attack"],
+    [AttackStyle.AGGRESSIVECRUSH]: ["strength"],
+    [AttackStyle.AGGRESSIVESLASH]: ["strength"],
+    // TODO: add different defensives for different weapons
+    [AttackStyle.DEFENSIVE]: ["defence"],
+    [AttackStyle.CONTROLLED]: ["attack"],
+    [AttackStyle.AUTOCAST]: ["attack"],
+    [AttackStyle.SHORT_FUSE]: ["range"],
+    [AttackStyle.MEDIUM_FUSE]: ["range"],
+    // TODO defence here
+    [AttackStyle.LONG_FUSE]: ["range"],
+  }
 
   static controller: AttackStylesController = new AttackStylesController();
   stylesMap: AttackStyleStorage = {};
@@ -135,5 +154,12 @@ export class AttackStylesController {
   }
   getWeaponAttackStyle(weapon: Weapon) {
     return this.stylesMap[weapon.attackStyleCategory()];
+  }
+
+  getWeaponXpDrops(style: AttackStyle, damage: number, multiplier: number): { xp: number, skill: string}[] {
+    return [
+      ...AttackStylesController.attackStyleXpType[style].map((skill) => ({ xp: damage * multiplier * 4, skill })),
+      { xp: damage * multiplier * 1.33,  skill: 'hitpoint'},
+    ];
   }
 }

@@ -60,4 +60,11 @@ export enum ItemName {
   MASORI_BODY_F = "Masori body (f)",
   MASORI_MASK_F = "Masori mask (f)",
   DIZANAS_QUIVER = "Dizana's Quiver",
+  TORVA_PLATEBODY = "Torva platebody",
+  TORVA_PLATELEGS = "Torva platelegs",
+  TORVA_FULL_HELM = "Torva full helm",
+  AMULET_OF_TORTURE = "Amulet of torture",
+  PRIMORDIAL_BOOTS = "Primordial boots",
+  FEROCIOUS_GLOVES = "Ferocious gloves",
+  INFERNAL_CAPE = "Infernal cape",
 }
