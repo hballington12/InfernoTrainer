@@ -23,7 +23,7 @@ export enum CardinalDirection {
 }
 
 // Base class for any trainer region.
-export class Region {
+export abstract class Region {
   canvas: OffscreenCanvas;
 
   players: Player[] = [];
@@ -166,6 +166,8 @@ export class Region {
       });
     });
   }
+
+  abstract initialiseRegion(): { player: Player };
 
   // calls preload on all renderable children
   async preload() {

@@ -46,7 +46,7 @@ export class TorvaFullhelm extends Helmet {
       },
     };
   }
-  
+
   override get model() {
     return Assets.getAssetUrl("models/player_sanguine_torva_full_helm.glb");
   }

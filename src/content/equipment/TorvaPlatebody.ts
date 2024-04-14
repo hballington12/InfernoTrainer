@@ -46,7 +46,7 @@ export class TorvaPlatebody extends Chest {
       },
     };
   }
-  
+
   override get model() {
     return Assets.getAssetUrl("models/player_sanguine_torva_platebody.glb");
   }

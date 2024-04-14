@@ -136,7 +136,7 @@ export class Projectile extends Renderable {
   }
 
   private isMeleeStyle() {
-    return (this.attackStyle === "slash" || this.attackStyle === "crush" || this.attackStyle === "stab");
+    return this.attackStyle === "slash" || this.attackStyle === "crush" || this.attackStyle === "stab";
   }
 
   private getColor() {

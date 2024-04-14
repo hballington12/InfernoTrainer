@@ -137,7 +137,7 @@ export class AttackStylesController {
     [AttackStyle.MEDIUM_FUSE]: ["range"],
     // TODO defence here
     [AttackStyle.LONG_FUSE]: ["range"],
-  }
+  };
 
   static controller: AttackStylesController = new AttackStylesController();
   stylesMap: AttackStyleStorage = {};
@@ -156,10 +156,10 @@ export class AttackStylesController {
     return this.stylesMap[weapon.attackStyleCategory()];
   }
 
-  getWeaponXpDrops(style: AttackStyle, damage: number, multiplier: number): { xp: number, skill: string}[] {
+  getWeaponXpDrops(style: AttackStyle, damage: number, multiplier: number): { xp: number; skill: string }[] {
     return [
       ...AttackStylesController.attackStyleXpType[style].map((skill) => ({ xp: damage * multiplier * 4, skill })),
-      { xp: damage * multiplier * 1.33,  skill: 'hitpoint'},
+      { xp: damage * multiplier * 1.33, skill: "hitpoint" },
     ];
   }
 }

@@ -22,9 +22,11 @@ export class RangedWeapon extends Weapon {
 
   grantXp(from: Unit, to: Unit) {
     if (from.type === UnitTypes.PLAYER && this.damage > 0) {
-      AttackStylesController.controller.getWeaponXpDrops(this.attackStyle(), this.damage, to.xpBonusMultiplier).forEach(({skill, xp}) => {
-        from.grantXp(new XpDrop(skill, xp));
-      });
+      AttackStylesController.controller
+        .getWeaponXpDrops(this.attackStyle(), this.damage, to.xpBonusMultiplier)
+        .forEach(({ skill, xp }) => {
+          from.grantXp(new XpDrop(skill, xp));
+        });
     }
   }
 

@@ -65,7 +65,6 @@ Using Dezinator's `osrscachereader` at https://github.com/Dezinater/osrscacherea
       - 8057 # scythe idle
       - 8056 # scythe swing
 
-
 ### NPC models
 
     # Zuk: Idle, Fire, Flinch, Die

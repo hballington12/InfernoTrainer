@@ -734,4 +734,3 @@ export abstract class Unit extends Renderable {
     return 1.0;
   }
 }
-

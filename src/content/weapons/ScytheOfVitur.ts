@@ -104,7 +104,7 @@ export class ScytheOfVitur extends MeleeWeapon {
     // the attacker.
     // Find the closest tile on the npc to us.
     const targetTile = to.getClosestTileTo(from.location.x, from.location.y);
-    
+
     const dx = from.location.x - targetTile[0];
     const dy = from.location.y - targetTile[1];
     let direction;

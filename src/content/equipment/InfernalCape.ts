@@ -46,7 +46,7 @@ export class InfernalCape extends Cape {
       },
     };
   }
-  
+
   override get model() {
     return Assets.getAssetUrl("models/player_infernal_cape.glb");
   }

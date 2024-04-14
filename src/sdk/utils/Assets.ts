@@ -4,7 +4,6 @@ export class Assets {
   static onProgressFns: ((loaded: number, total: number) => void)[] = [];
   static onLoadFns: (() => void)[] = [];
 
-
   static loadedAssets = {};
   /**
    * Returns the appropriate URL for an asset and also schedules it for preloading.
