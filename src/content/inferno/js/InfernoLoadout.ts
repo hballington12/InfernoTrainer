@@ -64,6 +64,7 @@ import { InfernalCape } from "../../equipment/InfernalCape";
 import { TorvaPlatebody } from "../../equipment/TorvaPlatebody";
 import { TorvaPlatelegs } from "../../equipment/TorvaPlatelegs";
 import { PrimordialBoots } from "../../equipment/PrimordialBoots";
+import { BrowserUtils } from "../../../sdk/utils/BrowserUtils";
 
 export class InfernoLoadout {
   wave: number;
@@ -131,7 +132,7 @@ export class InfernoLoadout {
         new BlackChinchompa(),
         new Blowpipe(),
         new MasoriBodyF(),
-        new TwistedBow(),
+        new TwistedBow(!!BrowserUtils.getQueryVar("geno")),
         new BastionPotion(),
         new NecklaceOfAnguish(),
         new MasoriChapsF(),
