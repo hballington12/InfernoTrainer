@@ -187,10 +187,15 @@ export class SolHeredit extends Mob {
     if (!this.aggro) {
       return { dx: this.location.x, dy: this.location.y };
     }
-    const closestTile = this.getClosestTileTo(this.aggro.location.x, this.aggro.location.y);
-    let originLocation = { x: closestTile[0], y: closestTile[1] };
-    let dx = this.location.x + _.clamp(this.aggro.location.x - originLocation.x, -this.maxSpeed, this.maxSpeed);
-    let dy = this.location.y + _.clamp(this.aggro.location.y - originLocation.y, -this.maxSpeed, this.maxSpeed);
+    const { x: tx, y: ty } = this.aggro.location;
+    const closestTile = this.getClosestTileTo(tx, ty);
+    const originLocation = { x: closestTile[0], y: closestTile[1] };
+    const maxSpeed = Math.min(
+      this.maxSpeed,
+      Math.max(Math.abs(originLocation.x - tx) - 1, Math.abs(originLocation.y - ty) - 1),
+    );
+    let dx = this.location.x + _.clamp(tx - originLocation.x, -maxSpeed, maxSpeed);
+    let dy = this.location.y + _.clamp(ty - originLocation.y, -maxSpeed, maxSpeed);
 
     if (
       Collision.collisionMath(
@@ -220,5 +225,9 @@ export class SolHeredit extends Mob {
       }
     }
     return { dx, dy };
+  }
+
+  override get drawTrueTile() {
+    return true;
   }
 }

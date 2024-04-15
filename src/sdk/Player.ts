@@ -84,7 +84,6 @@ export class Player extends Unit {
 
   clickMarker: ClickMarker | null = null;
   aggroMarker: ClickMarker | null = null;
-  trueTileMarker: ClickMarker;
 
   pathMarkers: ClickMarker[] = [];
   currentPoseAnimation = PlayerAnimationIndices.Idle;
@@ -102,8 +101,6 @@ export class Player extends Unit {
     this.setUnitOptions(options);
 
     this.prayerController = new PrayerController(this);
-    this.trueTileMarker = new ClickMarker(this.region, this.location, "#00FFFF");
-    this.region.addEntity(this.trueTileMarker);
   }
 
   contextActions(region: Region, x: number, y: number) {
@@ -590,7 +587,6 @@ export class Player extends Unit {
   }
 
   moveTowardsDestination() {
-    this.trueTileMarker.location = this.location;
     this.nextAngle = this.getTargetAngle();
     // Calculate run energy
     const dist = chebyshev(
@@ -665,9 +661,6 @@ export class Player extends Unit {
       });
     }
     this.path.push(...newTiles);
-    //console.log(this.location, path, [...this.path]);
-
-    this.trueTileMarker.location = this.location;
     this.nextAngle = this.getTargetAngle();
   }
 
@@ -971,6 +964,10 @@ export class Player extends Unit {
 
   override get attackAnimationId() {
     return this.equipment.weapon?.attackAnimationId;
+  }
+
+  override get drawTrueTile() {
+    return true;
   }
 }
 

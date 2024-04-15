@@ -21,10 +21,16 @@ export abstract class Renderable {
    */
   abstract getPerceivedRotation(tickPercent: number): number;
 
+  abstract getTrueLocation(): Location;
+
   abstract get size(): number;
 
   get drawOutline(): boolean {
     return true;
+  }
+
+  get drawTrueTile(): boolean {
+    return false;
   }
 
   get height(): number {

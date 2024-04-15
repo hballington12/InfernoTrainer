@@ -86,6 +86,10 @@ export class Entity extends Renderable {
     return 0;
   }
 
+  getTrueLocation() {
+    return this.location;
+  }
+
   get color() {
     return "#000073";
   }

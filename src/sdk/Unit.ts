@@ -258,6 +258,10 @@ export abstract class Unit extends Renderable {
     return 0;
   }
 
+  getTrueLocation() {
+    return this.location;
+  }
+
   removedFromWorld() {
     // Override me
   }

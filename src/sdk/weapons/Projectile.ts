@@ -197,6 +197,10 @@ export class Projectile extends Renderable {
     );
   }
 
+  getTrueLocation() {
+    return this.getPerceivedLocation(0);
+  }
+
   get size(): number {
     return this._size;
   }
