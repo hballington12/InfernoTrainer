@@ -169,6 +169,10 @@ export abstract class Region {
 
   abstract initialiseRegion(): { player: Player };
 
+  getSidebarContent(): string {
+    return "Nothing to see here";
+  }
+
   // calls preload on all renderable children
   async preload() {
     console.log("preloading region", this.entities, this.mobs, this.players);

@@ -9,8 +9,6 @@ import { UnitBonuses } from "../../../../sdk/Unit";
 import { Collision } from "../../../../sdk/Collision";
 import { EntityName } from "../../../../sdk/EntityName";
 import { Projectile } from "../../../../sdk/weapons/Projectile";
-import { InfernoRegion } from "../InfernoRegion";
-import { Random } from "../../../../sdk/Random";
 import { Sound } from "../../../../sdk/utils/SoundCache";
 import HitSound from "../../../../assets/sounds/dragon_hit_410.ogg";
 
@@ -39,9 +37,6 @@ export class JalZek extends Mob {
   }
 
   setStats() {
-    const region = this.region as InfernoRegion;
-    this.shouldRespawnMobs = region.wave >= 69;
-
     this.stunned = 1;
 
     this.weapons = {

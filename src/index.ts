@@ -36,6 +36,8 @@ world.getReadyTimer = 6;
 selectedRegion.world = world;
 world.addRegion(selectedRegion);
 
+document.getElementById('sidebar_content').innerHTML = selectedRegion.getSidebarContent();
+
 const { player } = selectedRegion.initialiseRegion();
 
 Viewport.setupViewport(selectedRegion);
@@ -43,91 +45,6 @@ Viewport.viewport.setPlayer(player);
 
 ImageLoader.onAllImagesLoaded(() => {
   MapController.controller.updateOrbsMask(player.currentStats, player.stats);
-});
-for (let x = 10; x < 41; x++) {
-  selectedRegion.addEntity(new InvisibleMovementBlocker(this, { x, y: 13 }));
-  selectedRegion.addEntity(new InvisibleMovementBlocker(this, { x, y: 44 }));
-}
-for (let y = 14; y < 44; y++) {
-  selectedRegion.addEntity(new InvisibleMovementBlocker(this, { x: 10, y }));
-  selectedRegion.addEntity(new InvisibleMovementBlocker(this, { x: 40, y }));
-}
-const waveInput: HTMLInputElement = document.getElementById("waveinput") as HTMLInputElement;
-
-const exportWaveInput: HTMLButtonElement = document.getElementById("exportCustomWave") as HTMLButtonElement;
-const editWaveInput: HTMLButtonElement = document.getElementById("editWave") as HTMLButtonElement;
-
-editWaveInput.addEventListener("click", () => {
-  const magers = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_ZEK;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const rangers = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_XIL;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const meleers = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_IM_KOT;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const blobs = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_AK;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const bats = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_MEJ_RAJ;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const url = `/?wave=0&mager=${JSON.stringify(magers)}&ranger=${JSON.stringify(
-    rangers,
-  )}&melee=${JSON.stringify(meleers)}&blob=${JSON.stringify(blobs)}&bat=${JSON.stringify(bats)}&copyable`;
-  window.location.href = url;
-});
-exportWaveInput.addEventListener("click", () => {
-  const magers = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_ZEK;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const rangers = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_XIL;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const meleers = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_IM_KOT;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const blobs = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_AK;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const bats = filter(selectedRegion.mobs, (mob: Mob) => {
-    return mob.mobName() === EntityName.JAL_MEJ_RAJ;
-  }).map((mob: Mob) => {
-    return [mob.location.x - 11, mob.location.y - 14];
-  });
-
-  const url = `/?wave=74&mager=${JSON.stringify(magers)}&ranger=${JSON.stringify(rangers)}&melee=${JSON.stringify(
-    meleers,
-  )}&blob=${JSON.stringify(blobs)}&bat=${JSON.stringify(bats)}&copyable`;
-  window.location.href = url;
 });
 
 if (Settings.tile_markers) {
@@ -144,14 +61,6 @@ player.perceivedLocation = player.location;
 player.destinationLocation = player.location;
 /// /////////////////////////////////////////////////////////
 // UI controls
-
-document.getElementById("playWaveNum").addEventListener("click", () => {
-  window.location.href = `/?wave=${waveInput.value || selectedRegion.wave}`;
-});
-
-document
-  .getElementById("pauseResumeLink")
-  .addEventListener("click", () => (world.isPaused ? world.startTicking() : world.stopTicking()));
 
 ImageLoader.onAllImagesLoaded(() =>
   MapController.controller.updateOrbsMask(Viewport.viewport.player.currentStats, Viewport.viewport.player.stats),

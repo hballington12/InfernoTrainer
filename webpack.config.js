@@ -54,6 +54,10 @@ const config = {
         test: /\.(png|svg|jpg|jpeg|gif|ogg|gltf|glb)$/i,
         type: "asset/resource",
       },
+      {
+        test: /\.html$/i,
+        loader: "html-loader",
+      },
     ],
   },
 };

@@ -17,7 +17,7 @@ import { InfernoWaves } from "./InfernoWaves";
 import { InfernoLoadout } from "./InfernoLoadout";
 import { InfernoPillar } from "./InfernoPillar";
 import { EntityName } from "../../../sdk/EntityName";
-import { shuffle } from "lodash";
+import { filter, shuffle } from "lodash";
 import { TileMarker } from "../../TileMarker";
 import { TzKalZuk } from "./mobs/TzKalZuk";
 import { ZukShield } from "./ZukShield";
@@ -25,6 +25,11 @@ import { JalTokJad } from "./mobs/JalTokJad";
 import { Wall } from "../../Wall";
 import { Location } from "../../../sdk/Location";
 import { InfernoScene } from "../../InfernoScene";
+import { InvisibleMovementBlocker } from "../../MovementBlocker";
+
+import SidebarContent from "../sidebar.html";
+import { Mob } from "../../../sdk/Mob";
+import { ControlPanelController } from "../../../sdk/ControlPanelController";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -194,6 +199,85 @@ export class InfernoRegion extends Region {
   }
 
   initialiseRegion() {
+    const waveInput: HTMLInputElement = document.getElementById("waveinput") as HTMLInputElement;
+
+
+    const exportWaveInput: HTMLButtonElement = document.getElementById("exportCustomWave") as HTMLButtonElement;
+    const editWaveInput: HTMLButtonElement = document.getElementById("editWave") as HTMLButtonElement;
+    
+    editWaveInput.addEventListener("click", () => {
+      const magers = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_ZEK;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const rangers = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_XIL;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const meleers = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_IM_KOT;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const blobs = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_AK;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const bats = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_MEJ_RAJ;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const url = `/?wave=0&mager=${JSON.stringify(magers)}&ranger=${JSON.stringify(
+        rangers,
+      )}&melee=${JSON.stringify(meleers)}&blob=${JSON.stringify(blobs)}&bat=${JSON.stringify(bats)}&copyable`;
+      window.location.href = url;
+    });
+    exportWaveInput.addEventListener("click", () => {
+      const magers = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_ZEK;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const rangers = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_XIL;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const meleers = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_IM_KOT;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const blobs = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_AK;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const bats = filter(this.mobs, (mob: Mob) => {
+        return mob.mobName() === EntityName.JAL_MEJ_RAJ;
+      }).map((mob: Mob) => {
+        return [mob.location.x - 11, mob.location.y - 14];
+      });
+    
+      const url = `/?wave=74&mager=${JSON.stringify(magers)}&ranger=${JSON.stringify(rangers)}&melee=${JSON.stringify(
+        meleers,
+      )}&blob=${JSON.stringify(blobs)}&bat=${JSON.stringify(bats)}&copyable`;
+      window.location.href = url;
+    });
+
     // create player
     const player = new Player(this, {
       x: parseInt(BrowserUtils.getQueryVar("x")) || 25,
@@ -233,6 +317,15 @@ export class InfernoRegion extends Region {
     const randomPillar = (shuffle(this.entities.filter((entity) => entity.entityName() === EntityName.PILLAR)) || [
       null,
     ])[0]; // Since we've only added pillars this is safe. Do not move to after movement blockers.
+
+    for (let x = 10; x < 41; x++) {
+      this.addEntity(new InvisibleMovementBlocker(this, { x, y: 13 }));
+      this.addEntity(new InvisibleMovementBlocker(this, { x, y: 44 }));
+    }
+    for (let y = 14; y < 44; y++) {
+      this.addEntity(new InvisibleMovementBlocker(this, { x: 10, y }));
+      this.addEntity(new InvisibleMovementBlocker(this, { x: 40, y }));
+    }
 
     const bat = BrowserUtils.getQueryVar("bat") || "[]";
     const blob = BrowserUtils.getQueryVar("blob") || "[]";
@@ -378,6 +471,19 @@ export class InfernoRegion extends Region {
       importSpawn();
     }
 
+
+        
+    document.getElementById("playWaveNum").addEventListener("click", () => {
+      window.location.href = `/?wave=${waveInput.value || this.wave}`;
+    });
+
+    document
+      .getElementById("pauseResumeLink")
+      .addEventListener("click", () => (this.world.isPaused ? this.world.startTicking() : this.world.stopTicking()));
+
+    waveInput.addEventListener("focus", () => (ControlPanelController.controller.isUsingExternalUI = true));
+    waveInput.addEventListener("focusout", () => (ControlPanelController.controller.isUsingExternalUI = false));
+      
     // Add 3d scene
     if (Settings.use3dView) {
       this.addEntity(new InfernoScene(this, { x: 0, y: 48 }));
@@ -408,5 +514,10 @@ export class InfernoRegion extends Region {
   drawDefaultFloor() {
     // replaced by an Entity in 3d view
     return !Settings.use3dView;
+  }
+
+  getSidebarContent() {
+    console.log('getting sidebar content');
+    return SidebarContent;
   }
 }
