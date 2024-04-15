@@ -105,9 +105,7 @@ export class ColosseumRegion extends Region {
     loadout.setStats(player);
     player.setUnitOptions(loadout.getLoadout());
 
-    this.addMob(new SolHeredit(this, { x: 25, y: 30 }, { aggro: player }));
-    this.addMob(new SolHeredit(this, { x: 25, y: 35 }, { aggro: player }));
-    this.addMob(new SolHeredit(this, { x: 25, y: 40 }, { aggro: player }));
+    this.addMob(new SolHeredit(this, { x: 25, y: 14 }, { aggro: player }));
 
     // Add 3d scene
     if (Settings.use3dView) {
@@ -117,5 +115,9 @@ export class ColosseumRegion extends Region {
     return {
       player: player,
     };
+  }
+
+  getSidebarContent() {
+    return "READ ME: this is a work in progress";
   }
 }

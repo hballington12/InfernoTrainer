@@ -13,6 +13,8 @@ import HitSound from "../../../../assets/sounds/dragon_hit_410.ogg";
 
 import { GLTFModel } from "../../../../sdk/rendering/GLTFModel";
 import { Assets } from "../../../../sdk/utils/Assets";
+import { Random } from "../../../../sdk/Random";
+import _ from "lodash";
 
 export const SolHereditModel = Assets.getAssetUrl("models/sol.glb");
 
@@ -28,7 +30,7 @@ export class SolHeredit extends Mob {
   }
 
   get combatLevel() {
-    return 490;
+    return 1200;
   }
 
   dead() {
@@ -40,7 +42,6 @@ export class SolHeredit extends Mob {
 
     this.weapons = {
       stab: new MeleeWeapon(),
-      magic: new MagicWeapon(),
     };
 
     // non boosted numbers
@@ -50,7 +51,7 @@ export class SolHeredit extends Mob {
       defence: 260,
       range: 510,
       magic: 300,
-      hitpoint: 220,
+      hitpoint: 1200,
     };
 
     // with boosts
@@ -176,5 +177,48 @@ export class SolHeredit extends Mob {
 
   override get attackAnimationId() {
     return 2;
+  }
+
+  get maxSpeed() {
+    return 2;
+  }
+
+  override getNextMovementStep() {
+    if (!this.aggro) {
+      return { dx: this.location.x, dy: this.location.y };
+    }
+    const closestTile = this.getClosestTileTo(this.aggro.location.x, this.aggro.location.y);
+    let originLocation = { x: closestTile[0], y: closestTile[1] };
+    let dx = this.location.x + _.clamp(this.aggro.location.x - originLocation.x, -this.maxSpeed, this.maxSpeed);
+    let dy = this.location.y + _.clamp(this.aggro.location.y - originLocation.y, -this.maxSpeed, this.maxSpeed);
+
+    if (
+      Collision.collisionMath(
+        this.location.x,
+        this.location.y,
+        this.size,
+        this.aggro.location.x,
+        this.aggro.location.y,
+        1,
+      )
+    ) {
+      // Random movement if player is under the mob.
+      if (Random.get() < 0.5) {
+        dy = this.location.y;
+        if (Random.get() < 0.5) {
+          dx = this.location.x + 1;
+        } else {
+          dx = this.location.x - 1;
+        }
+      } else {
+        dx = this.location.x;
+        if (Random.get() < 0.5) {
+          dy = this.location.y + 1;
+        } else {
+          dy = this.location.y - 1;
+        }
+      }
+    }
+    return { dx, dy };
   }
 }
