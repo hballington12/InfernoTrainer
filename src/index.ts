@@ -19,6 +19,7 @@ import { Chrome } from "./sdk/Chrome";
 import SpecialAttackBarBackground from "./assets/images/attackstyles/interface/special_attack_background.png";
 import { InfernoScene } from "./content/InfernoScene";
 import { Region } from "./sdk/Region";
+import { ColosseumRegion } from "./content/colosseum/js/ColosseumRegion";
 
 declare global {
   interface Window {
@@ -28,7 +29,15 @@ declare global {
 
 Settings.readFromStorage();
 
-const selectedRegion: Region = new InfernoRegion();
+// Choose the region based on the URL.
+const AVAILABLE_REGIONS = {
+  'inferno.html': new InfernoRegion(),
+  'colosseum.html': new ColosseumRegion(),
+};
+const DEFAULT_REGION_PATH = 'inferno.html';
+
+const regionName = window.location.pathname.split('/').pop();
+const selectedRegion: Region = (regionName in AVAILABLE_REGIONS) ? AVAILABLE_REGIONS[regionName] : AVAILABLE_REGIONS[DEFAULT_REGION_PATH];
 
 // Create world
 const world = new World();
@@ -36,7 +45,16 @@ world.getReadyTimer = 6;
 selectedRegion.world = world;
 world.addRegion(selectedRegion);
 
+// Initialise UI
 document.getElementById('sidebar_content').innerHTML = selectedRegion.getSidebarContent();
+
+const use3dViewCheckbox = document.getElementById("use3dView") as HTMLInputElement;
+use3dViewCheckbox.checked = Settings.use3dView;
+use3dViewCheckbox.addEventListener("change", () => {
+  Settings.use3dView = use3dViewCheckbox.checked;
+  Settings.persistToStorage();
+  window.location.reload();
+});
 
 const { player } = selectedRegion.initialiseRegion();
 

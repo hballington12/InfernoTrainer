@@ -33,7 +33,8 @@ export class ColosseumScene extends Entity {
   }
 
   create3dModel(): Model {
-    return new GLTFModel(this, [Assets.getAssetUrl("models/colosseum.glb")], 1, -2.5, {
+    // one day we'll figure out the offsets used in the exporter...
+    return new GLTFModel(this, [Assets.getAssetUrl("models/colosseum.glb")], 1, -11.2, {
       x: -6.5,
       y: 12.5,
     });

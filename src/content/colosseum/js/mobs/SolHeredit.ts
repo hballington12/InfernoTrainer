@@ -3,8 +3,7 @@
 import { MagicWeapon } from "../../../../sdk/weapons/MagicWeapon";
 import { MeleeWeapon } from "../../../../sdk/weapons/MeleeWeapon";
 import { Mob, AttackIndicators } from "../../../../sdk/Mob";
-import MagerImage from "../../assets/images/mager.png";
-import MagerSound from "../../assets/sounds/mager.ogg";
+import AttackSound from "../../../../assets/sounds/scythe_swing_2524.ogg";
 import { UnitBonuses } from "../../../../sdk/Unit";
 import { Collision } from "../../../../sdk/Collision";
 import { EntityName } from "../../../../sdk/EntityName";
@@ -15,13 +14,13 @@ import HitSound from "../../../../assets/sounds/dragon_hit_410.ogg";
 import { GLTFModel } from "../../../../sdk/rendering/GLTFModel";
 import { Assets } from "../../../../sdk/utils/Assets";
 
-export const MagerModel = Assets.getAssetUrl("models/7699_33000.glb");
+export const SolHereditModel = Assets.getAssetUrl("models/sol.glb");
 
-export class JalZek extends Mob {
+export class SolHeredit extends Mob {
   shouldRespawnMobs: boolean;
 
   mobName(): EntityName {
-    return EntityName.JAL_ZEK;
+    return EntityName.SOL_HEREDIT;
   }
 
   shouldChangeAggro(projectile: Projectile) {
@@ -84,23 +83,19 @@ export class JalZek extends Mob {
   }
 
   get attackSpeed() {
-    return 4;
+    return 7;
   }
 
   get attackRange() {
-    return 15;
+    return 1;
   }
 
   get size() {
-    return 4;
-  }
-
-  get image() {
-    return MagerImage;
+    return 5;
   }
 
   get sound() {
-    return new Sound(MagerSound);
+    return new Sound(AttackSound);
   }
 
   hitSound(damaged) {
@@ -108,7 +103,7 @@ export class JalZek extends Mob {
   }
 
   attackStyleForNewAttack() {
-    return "magic";
+    return "stab" as const;
   }
 
   canMeleeIfClose() {
@@ -168,7 +163,15 @@ export class JalZek extends Mob {
   }
 
   create3dModel() {
-    return GLTFModel.forRenderable(this, MagerModel, 0.0075);
+    return GLTFModel.forRenderable(this, SolHereditModel, 0.02);
+  }
+
+  get idlePoseId() {
+    return 0;
+  }
+
+  get walkingPoseId() {
+    return 1;
   }
 
   override get attackAnimationId() {

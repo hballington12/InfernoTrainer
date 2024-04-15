@@ -25,14 +25,10 @@ import { TorvaPlatelegs } from "../../equipment/TorvaPlatelegs";
 import { PrimordialBoots } from "../../equipment/PrimordialBoots";
 
 export class ColosseumLoadout {
-  wave: number;
   loadoutType: string;
-  onTask: boolean;
 
-  constructor(wave: number, loadoutType: string, onTask: boolean) {
-    this.wave = wave;
+  constructor(loadoutType: string) {
     this.loadoutType = loadoutType;
-    this.onTask = onTask;
   }
 
   loadoutMaxMelee() {
