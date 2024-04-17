@@ -95,7 +95,7 @@ export class ColosseumRegion extends Region {
   initialiseRegion() {
     // create player
     const player = new Player(this, {
-      x: 25,
+      x: 27,
       y: 25,
     });
 
