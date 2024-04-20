@@ -66,7 +66,7 @@ export class SolHeredit extends Mob {
   private firstSpear = true;
   private firstShield = true;
 
-  adjacentTimer = 0;
+  stationaryTimer = 0;
 
   mobName(): EntityName {
     return EntityName.SOL_HEREDIT;
@@ -166,6 +166,9 @@ export class SolHeredit extends Mob {
     this.attackStyle = this.attackStyleForNewAttack();
 
     this.attackFeedback = AttackIndicators.NONE;
+    if (!this.aggro) {
+      return;
+    }
 
     this.hadLOS = this.hasLOS;
     // override LOS check to attack melee diagonally
@@ -173,20 +176,13 @@ export class SolHeredit extends Mob {
     const dx = this.aggro.location.x - tx,
       dy = this.aggro.location.y - ty;
     const isAdjacent = Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
-    // boss must be adjacent for at least 1 tick to attack.
-    if (isAdjacent) {
-      this.hasLOS = this.adjacentTimer > 0;
-      ++this.adjacentTimer;
-    } else {
-      this.adjacentTimer = 0;
-      this.hasLOS = false;
-    }
+    this.hasLOS = isAdjacent;
 
     if (this.canAttack() === false) {
       return;
     }
 
-    if (this.hasLOS && this.attackDelay <= 0) {
+    if (this.hasLOS && this.attackDelay <= 0 && this.stationaryTimer > 0) {
       if (Random.get() < 0.5) {
         this.attackShield();
       } else {
@@ -225,7 +221,7 @@ export class SolHeredit extends Mob {
     this.firstSpear = true;
     this.firstShield = !this.firstShield;
 
-    this.attackDelay = 7;
+    this.attackDelay = 6;
   }
 
   private fillRect(fromX: number, fromY: number, toX: number, toY: number, exceptRadius = null) {
@@ -501,6 +497,11 @@ export class SolHeredit extends Mob {
           dy = this.location.y - 1;
         }
       }
+    }
+    if (dx === this.location.x && dy === this.location.y) {
+      this.stationaryTimer++;
+    } else {
+      this.stationaryTimer = 0;
     }
     return { dx, dy };
   }
