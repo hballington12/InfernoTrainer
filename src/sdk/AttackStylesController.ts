@@ -65,6 +65,9 @@ export enum AttackStyle {
   REAP = "REAP",
   AGGRESSIVECRUSH = "AGGRESSIVE (CRUSH)",
   AGGRESSIVESLASH = "AGGRESSIVE (SLASH)",
+  REAP = "REAP",
+  AGGRESSIVECRUSH = "AGGRESSIVE (CRUSH)",
+  AGGRESSIVESLASH = "AGGRESSIVE (SLASH)",
   DEFENSIVE = "DEFENSIVE",
   CONTROLLED = "CONTROLLED",
   AUTOCAST = "AUTOCAST",
@@ -84,6 +87,24 @@ interface AttackStyleImageMap {
 interface IAttackStyleImageMap {
   [style: string]: HTMLImageElement;
 }
+
+// xp multiplier constants
+const DEFENCE_2 = { skill: "defence", multiplier: 2 };
+const HITPOINTS_133 = { skill: "hitpoint", multiplier: 1.33 };
+
+const MELEE_ACCURATE = [{ skill: "attack", multiplier: 4 }, HITPOINTS_133];
+const MELEE_AGGRESSIVE = [{ skill: "strength", multiplier: 4 }, HITPOINTS_133];
+const MELEE_DEFENSIVE = [{ skill: "defence", multiplier: 4 }, HITPOINTS_133];
+const MELEE_CONTROLLED = [
+  { skill: "attack", multiplier: 1.33 },
+  { skill: "strength", multiplier: 1.33 },
+  { skill: "defence", multiplier: 1.33 },
+  HITPOINTS_133,
+];
+
+const RANGE_ACCURATE = [{ skill: "range", multiplier: 4 }, HITPOINTS_133];
+const RANGE_RAPID = [{ skill: "range", multiplier: 4 }, HITPOINTS_133];
+const RANGE_LONGRANGE = [{ skill: "range", multiplier: 2 }, DEFENCE_2, HITPOINTS_133];
 
 export class AttackStylesController {
   static attackStyleImageMap: AttackStyleImageMap = {
@@ -121,22 +142,21 @@ export class AttackStylesController {
     },
   };
 
-  static attackStyleXpType: Record<AttackStyle, string[]> = {
-    [AttackStyle.ACCURATE]: ["range"],
-    [AttackStyle.RAPID]: ["range"],
-    // TODO: defence here
-    [AttackStyle.LONGRANGE]: ["range"],
-    [AttackStyle.REAP]: ["attack"],
-    [AttackStyle.AGGRESSIVECRUSH]: ["strength"],
-    [AttackStyle.AGGRESSIVESLASH]: ["strength"],
+  static attackStyleXpType: Record<AttackStyle, { skill: string; multiplier: number }[]> = {
+    [AttackStyle.ACCURATE]: RANGE_ACCURATE,
+    [AttackStyle.RAPID]: RANGE_RAPID,
+    [AttackStyle.LONGRANGE]: RANGE_LONGRANGE,
+    [AttackStyle.REAP]: MELEE_ACCURATE,
+    [AttackStyle.AGGRESSIVECRUSH]: MELEE_AGGRESSIVE,
+    [AttackStyle.AGGRESSIVESLASH]: MELEE_AGGRESSIVE,
     // TODO: add different defensives for different weapons
-    [AttackStyle.DEFENSIVE]: ["defence"],
-    [AttackStyle.CONTROLLED]: ["attack"],
-    [AttackStyle.AUTOCAST]: ["attack"],
-    [AttackStyle.SHORT_FUSE]: ["range"],
-    [AttackStyle.MEDIUM_FUSE]: ["range"],
-    // TODO defence here
-    [AttackStyle.LONG_FUSE]: ["range"],
+    [AttackStyle.DEFENSIVE]: MELEE_DEFENSIVE,
+    [AttackStyle.CONTROLLED]: MELEE_CONTROLLED,
+    [AttackStyle.AUTOCAST]: [{ skill: "magic", multiplier: 2 }, HITPOINTS_133],
+    // TODO: AUTOCAST_DEFENSIVE
+    [AttackStyle.SHORT_FUSE]: RANGE_ACCURATE,
+    [AttackStyle.MEDIUM_FUSE]: RANGE_RAPID,
+    [AttackStyle.LONG_FUSE]: RANGE_LONGRANGE,
   };
 
   static controller: AttackStylesController = new AttackStylesController();
@@ -156,10 +176,10 @@ export class AttackStylesController {
     return this.stylesMap[weapon.attackStyleCategory()];
   }
 
-  getWeaponXpDrops(style: AttackStyle, damage: number, multiplier: number): { xp: number; skill: string }[] {
-    return [
-      ...AttackStylesController.attackStyleXpType[style].map((skill) => ({ xp: damage * multiplier * 4, skill })),
-      { xp: damage * multiplier * 1.33, skill: "hitpoint" },
-    ];
+  getWeaponXpDrops(style: AttackStyle, damage: number, npcMultiplier: number): { xp: number; skill: string }[] {
+    return AttackStylesController.attackStyleXpType[style].map(({ skill, multiplier: skillMultiplier }) => ({
+      xp: damage * skillMultiplier * npcMultiplier,
+      skill,
+    }));
   }
 }

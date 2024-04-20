@@ -136,6 +136,10 @@ export class Player extends Unit {
     return "#00FF00";
   }
 
+  get height() {
+    return 1;
+  }
+
   get isPlayer(): boolean {
     return true;
   }
@@ -172,6 +176,13 @@ export class Player extends Unit {
 
   postAttacksEvent() {
     this.eats.checkRedemption(this);
+  }
+
+  swapItemPositions(pos1: number, pos2: number) {
+    // positions can be negative if an item is destroyed due to consuming it on the same tick
+    const temp = this.inventory[pos1] ?? null;
+    this.inventory[pos1] = this.inventory[pos2] ?? null;
+    this.inventory[pos2] = temp;
   }
 
   equipmentChanged() {
@@ -318,6 +329,8 @@ export class Player extends Unit {
 
     this.manualSpellCastSelection = null;
 
+    this.pathTargetLocation = null;
+
     const clickedOnEntities = Collision.collideableEntitiesAtPoint(this.region, x, y, 1);
     if (clickedOnEntities.length) {
       // Clicked on an entity, scan around to find the best spot to actually path to
@@ -390,12 +403,6 @@ export class Player extends Unit {
     }
 
     return true;
-  }
-
-  override playAttackSound() {
-    /*if (this.equipment.weapon?.attackSound) {
-      SoundCache.play(this.equipment.weapon?.attackSound);
-    }*/
   }
 
   activatePrayers() {
@@ -510,11 +517,12 @@ export class Player extends Unit {
       this.destinationLocation = this.seekingItem.groundLocation;
     }
   }
-
   private getIdlePoseId() {
     return this.equipment.weapon ? this.equipment.weapon.idleAnimationId : PlayerAnimationIndices.Idle;
   }
 
+  // WARNING: client ticks do NOT happen in line with render or logic ticks. Do not use this for anything other than
+  // visual logic.
   clientTick(tickPercent) {
     // based on https://github.com/dennisdev/rs-map-viewer/blob/master/src/mapviewer/webgl/npc/Npc.ts#L115
     if (this.path.length === 0) {
@@ -526,7 +534,7 @@ export class Player extends Unit {
     const currentAngle = this.getPerceivedRotation(tickPercent);
 
     // 30 client ticks per tick and we want to walk 1 tile per tick so
-    const baseMovementSpeed = 1 / 25;
+    const baseMovementSpeed = 1 / 30;
     let movementSpeed = baseMovementSpeed;
 
     this.currentPoseAnimation = PlayerAnimationIndices.Walk;
@@ -589,10 +597,9 @@ export class Player extends Unit {
   moveTowardsDestination() {
     this.nextAngle = this.getTargetAngle();
     // Calculate run energy
-    const dist = chebyshev(
-      [this.location.x, this.location.y],
-      [this.destinationLocation.x, this.destinationLocation.y],
-    );
+    const dist = this.pathTargetLocation
+      ? chebyshev([this.location.x, this.location.y], [this.pathTargetLocation.x, this.pathTargetLocation.y])
+      : 0;
     if (this.running && dist > 1) {
       const runReduction = 67 + Math.floor(67 + Math.min(Math.max(0, this.weight), 64) / 64);
       if (this.effects.stamina) {
@@ -609,6 +616,7 @@ export class Player extends Unit {
     if (this.currentStats.run === 0) {
       this.running = false;
     }
+    // Tick down stamina
     this.effects.stamina--;
     this.effects.stamina = Math.min(Math.max(this.effects.stamina, 0), 200);
 
@@ -640,7 +648,7 @@ export class Player extends Unit {
     // save the next 2 steps for interpolation purposes
     let newTiles = path.map((pos, idx) => ({
       ...pos,
-      run: path.length >= 2,
+      run: this.running && path.length >= 2,
       direction: Pathing.angle(
         idx === 0 ? originalLocation.x : path[idx - 1].x,
         idx === 0 ? originalLocation.y : path[idx - 1].y,
@@ -807,6 +815,11 @@ export class Player extends Unit {
 
     this.clearXpDrops();
 
+    // clear aggro if target is nulled (e.g. healers on zuk after tag)
+    if (this.aggro && this.aggro.isNulled) {
+      this.aggro = null;
+    }
+
     this.attackIfPossible();
 
     this.eats.tickFood(this);
@@ -964,6 +977,10 @@ export class Player extends Unit {
 
   override get attackAnimationId() {
     return this.equipment.weapon?.attackAnimationId;
+  }
+
+  get canBlendAttackAnimation() {
+    return true;
   }
 
   override get drawTrueTile() {

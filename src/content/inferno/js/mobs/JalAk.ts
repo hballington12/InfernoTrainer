@@ -17,6 +17,7 @@ import { Random } from "../../../../sdk/Random";
 import { Sound } from "../../../../sdk/utils/SoundCache";
 import { Assets } from "../../../../sdk/utils/Assets";
 import { GLTFModel } from "../../../../sdk/rendering/GLTFModel";
+import { Viewport } from "../../../../sdk/Viewport";
 
 const BlobModel = Assets.getAssetUrl("models/7693_33001.glb");
 
@@ -41,8 +42,12 @@ export class JalAk extends Mob {
 
     this.weapons = {
       crush: new MeleeWeapon(),
-      magic: new MagicWeapon(),
-      range: new RangedWeapon(),
+      magic: new MagicWeapon({
+        sound: new Sound(BlobSound)
+      }),
+      range: new RangedWeapon({
+        sound: new Sound(BlobSound)
+      }),
     };
 
     // non boosted numbers
@@ -98,13 +103,14 @@ export class JalAk extends Mob {
     return 3;
   }
 
+  get height() {
+    return 2;
+  }
+
   get image() {
     return BlobImage;
   }
-
-  get sound() {
-    return new Sound(BlobSound);
-  }
+  
   attackAnimation(tickPercent: number, context) {
     context.scale(1 + Math.sin(tickPercent * Math.PI) / 4, 1 - Math.sin(tickPercent * Math.PI) / 4);
   }
@@ -160,15 +166,16 @@ export class JalAk extends Mob {
   }
 
   removedFromWorld() {
+    const player = Viewport.viewport.player;
     const xil = new JalAkRekXil(
       this.region,
       { x: this.location.x + 1, y: this.location.y - 1 },
-      { aggro: this.aggro, cooldown: 4 },
+      { aggro: player, cooldown: 4 },
     );
     this.region.addMob(xil as Mob);
 
     const ket = new JalAkRekKet(this.region, this.location, {
-      aggro: this.aggro,
+      aggro: player,
       cooldown: 4,
     });
     this.region.addMob(ket as Mob);
@@ -176,7 +183,7 @@ export class JalAk extends Mob {
     const mej = new JalAkRekMej(
       this.region,
       { x: this.location.x + 2, y: this.location.y - 2 },
-      { aggro: this.aggro, cooldown: 4 },
+      { aggro: player, cooldown: 4 },
     );
     this.region.addMob(mej as Mob);
   }
@@ -187,5 +194,9 @@ export class JalAk extends Mob {
 
   override get attackAnimationId() {
     return this.attackStyle === "magic" ? 2 : 4;
+  }
+
+  override get deathAnimationId() {
+    return 3;
   }
 }

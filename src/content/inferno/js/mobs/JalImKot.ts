@@ -39,7 +39,9 @@ export class JalImKot extends Mob {
     this.stunned = 1;
 
     this.weapons = {
-      slash: new MeleeWeapon(),
+      slash: new MeleeWeapon({
+        sound: new Sound(MeleerSound, 0.6)
+      }),
     };
 
     // non boosted numbers
@@ -100,10 +102,6 @@ export class JalImKot extends Mob {
     return MeleerImage;
   }
 
-  get sound() {
-    return new Sound(MeleerSound, 0.75);
-  }
-
   get color() {
     return "#ACFF5633";
   }
@@ -127,6 +125,9 @@ export class JalImKot extends Mob {
   }
 
   startDig() {
+    if (!this.aggro) {
+      return;
+    }
     this.freeze(6);
     this.digSequenceTime = 6;
     this.digCount++;
@@ -182,7 +183,15 @@ export class JalImKot extends Mob {
     return GLTFModel.forRenderable(this, MeleerModel, 0.0075);
   }
 
+  get deathAnimationLength() {
+    return 6;
+  }
+
   get attackAnimationId() {
     return 2;
+  }
+
+  override get deathAnimationId() {
+    return 6;
   }
 }

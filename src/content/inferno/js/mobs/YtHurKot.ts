@@ -104,7 +104,7 @@ export class YtHurKot extends Mob {
   }
 
   attackStyleForNewAttack() {
-    return this.aggro.type === UnitTypes.PLAYER ? "crush" : "heal";
+    return this.aggro?.type === UnitTypes.PLAYER ? "crush" : "heal";
   }
 
   get attackRange() {
@@ -117,10 +117,6 @@ export class YtHurKot extends Mob {
 
   get image() {
     return HurKotImage;
-  }
-
-  get sound() {
-    return null;
   }
 
   get color() {

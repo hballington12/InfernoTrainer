@@ -36,19 +36,19 @@ export class Viewport2d implements ViewportDelegate {
       const location = r.getPerceivedLocation(world.tickPercent);
       r.draw(world.tickPercent, region.context, location, Settings.tileSize);
     });
+    const getOffset = (r: Renderable) => {
+      const perceivedLocation = r.getPerceivedLocation(world.tickPercent);
+      const perceivedX = perceivedLocation.x;
+      const perceivedY = perceivedLocation.y;
 
-    region.entities.forEach((entity) => entity.drawUILayer(world.tickPercent));
-    if (world.getReadyTimer === 0) {
-      const getOffset = (r: Renderable) => {
-        const perceivedLocation = r.getPerceivedLocation(world.tickPercent);
-        const perceivedX = perceivedLocation.x;
-        const perceivedY = perceivedLocation.y;
-
-        return {
-          x: perceivedX * Settings.tileSize + (r.size * Settings.tileSize) / 2,
-          y: (perceivedY - r.size + 1) * Settings.tileSize + (r.size * Settings.tileSize) / 2,
-        };
+      return {
+        x: perceivedX * Settings.tileSize + (r.size * Settings.tileSize) / 2,
+        y: (perceivedY - r.size + 1) * Settings.tileSize + (r.size * Settings.tileSize) / 2,
       };
+    };
+
+    region.entities.forEach((entity) => entity.drawUILayer(world.tickPercent, getOffset(entity), entity.region.context, Settings.tileSize, true));
+    if (world.getReadyTimer <= 0) {
       region.mobs.forEach((mob) =>
         mob.drawUILayer(world.tickPercent, getOffset(mob), mob.region.context, Settings.tileSize, true),
       );
@@ -144,8 +144,7 @@ export class Viewport2d implements ViewportDelegate {
 
       const startX = projectile.currentLocation.x;
       const startY = projectile.currentLocation.y;
-      const endX = projectile.to.location.x + projectile.to.size / 2;
-      const endY = projectile.to.location.y - projectile.to.size / 2 + 1;
+      const { x: endX, y: endY } = projectile.getTargetDestination(tickPercent);
 
       const perceivedX = Pathing.linearInterpolation(startX, endX, tickPercent / (projectile.remainingDelay + 1));
       const perceivedY = Pathing.linearInterpolation(startY, endY, tickPercent / (projectile.remainingDelay + 1));

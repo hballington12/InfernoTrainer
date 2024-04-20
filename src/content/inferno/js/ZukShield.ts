@@ -91,6 +91,7 @@ export class ZukShield extends Mob {
   }
 
   dead() {
+    super.dead();
     this.dying = 3;
     DelayedAction.registerDelayedAction(
       new DelayedAction(() => {
@@ -109,6 +110,11 @@ export class ZukShield extends Mob {
         }
       }, 2),
     );
+  }
+
+  override visible() {
+    // always visible, even during countdown
+    return true;
   }
 
   get drawOutline() {
@@ -201,11 +207,12 @@ export class ZukShield extends Mob {
   create3dModel() {
     return GLTFModel.forRenderable(this, ShieldModel, 0.0075);
   }
+
   get animationIndex() {
-    if (this.dying >= 0) {
-      return 1; // dying
-    } else {
-      return 0; // idle
-    }
+    return 0; // idle
+  }
+
+  override get deathAnimationId() {
+    return 1;
   }
 }

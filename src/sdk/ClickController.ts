@@ -1,7 +1,6 @@
 import { filter } from "lodash";
 import { TileMarker } from "../content/TileMarker";
 import { ClickAnimation } from "./ClickAnimation";
-import { Collision } from "./Collision";
 import { MenuOption } from "./ContextMenu";
 import { Entity } from "./Entity";
 import { EntityName } from "./EntityName";
@@ -10,16 +9,15 @@ import { Pathing } from "./Pathing";
 import { Settings } from "./Settings";
 import { Unit } from "./Unit";
 import { Viewport } from "./Viewport";
-import { Chrome } from "./Chrome";
 import { MapController } from "./MapController";
 import { ControlPanelController } from "./ControlPanelController";
 import { Player } from "./Player";
 import { Mob } from "./Mob";
 import { World } from "./World";
 import { Region } from "./Region";
+import { InputController } from "./Input";
 
 export class ClickController {
-  inputDelay?: NodeJS.Timeout = null;
   clickAnimation?: ClickAnimation = null;
   viewport: Viewport;
 
@@ -177,19 +175,20 @@ export class ClickController {
 
     Viewport.viewport.player.interruptCombat();
 
+    const inputController = InputController.controller;
     if (mobs.length && mobs[0].canBeAttacked()) {
       this.redClick();
-      this.sendToServer(() => this.playerAttackClick(mobs[0]));
+      inputController.queueAction(() => this.playerAttackClick(mobs[0]));
     } else if (players.length) {
       this.redClick();
-      this.sendToServer(() => this.playerAttackClick(players[0]));
+      inputController.queueAction(() => this.playerAttackClick(players[0]));
     } else if (groundItems.length) {
       this.redClick();
 
-      this.sendToServer(() => player.setSeekingItem(groundItems[0]));
+      inputController.queueAction(() => player.setSeekingItem(groundItems[0]));
     } else if (x !== null && y !== null) {
       this.yellowClick();
-      this.sendToServer(() => this.playerWalkClick(x, y));
+      inputController.queueAction(() => this.playerWalkClick(x, y));
     }
     Viewport.viewport.contextMenu.setInactive();
   }
@@ -200,6 +199,14 @@ export class ClickController {
 
     Viewport.viewport.contextMenu.setPosition({ x: e.offsetX, y: e.offsetY });
 
+    if (ControlPanelController.controller.controlPanelRightClick(e)) {
+      return;
+    }
+
+    if (MapController.controller.rightClick(e)) {
+      return;
+    }
+
     const clickedOn = this.getClickedOn(e, world, region);
 
     if (!clickedOn) {
@@ -207,26 +214,6 @@ export class ClickController {
     }
 
     const { mobs, players, groundItems, x, y } = clickedOn;
-
-    const { width } = Chrome.size();
-
-    if (e.offsetX > width - ControlPanelController.controller.width) {
-      if (e.offsetY > this.viewport.height * Settings.tileSize - ControlPanelController.controller.height) {
-        const intercepted = ControlPanelController.controller.controlPanelRightClick(e);
-        if (intercepted) {
-          return;
-        }
-      }
-    }
-
-    if (e.offsetX > width - MapController.controller.width) {
-      if (e.offsetY < MapController.controller.height) {
-        const intercepted = MapController.controller.rightClick(e);
-        if (intercepted) {
-          return;
-        }
-      }
-    }
 
     Viewport.viewport.contextMenu.destinationLocation = {
       x: Math.floor(x),
@@ -250,7 +237,7 @@ export class ClickController {
           { text: "Take ", fillStyle: "white" },
           { text: item.itemName, fillStyle: "#FF911F" },
         ],
-        action: () => this.sendToServer(() => Viewport.viewport.player.setSeekingItem(item)),
+        action: () => InputController.controller.queueAction(() => Viewport.viewport.player.setSeekingItem(item)),
       });
     });
 
@@ -261,7 +248,7 @@ export class ClickController {
           this.yellowClick();
           const x = Viewport.viewport.contextMenu.destinationLocation.x;
           const y = Viewport.viewport.contextMenu.destinationLocation.y;
-          this.sendToServer(() => this.playerWalkClick(x, y));
+          InputController.controller.queueAction(() => this.playerWalkClick(x, y));
         },
       },
       {
@@ -300,19 +287,14 @@ export class ClickController {
     Viewport.viewport.contextMenu.setActive();
   }
 
-  sendToServer(fn: () => void) {
-    if (this.inputDelay) {
-      clearTimeout(this.inputDelay);
-    }
-    this.inputDelay = setTimeout(fn, Settings.inputDelay);
-  }
-
   playerAttackClick(mob: Unit) {
     Viewport.viewport.player.setAggro(mob);
   }
+
   playerWalkClick(x: number, y: number) {
     Viewport.viewport.player.moveTo(Math.floor(x), Math.floor(y));
   }
+
   redClick() {
     this.clickAnimation = new ClickAnimation(
       "red",

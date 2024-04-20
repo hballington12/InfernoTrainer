@@ -1,5 +1,4 @@
 import { Unit, UnitTypes } from "../Unit";
-import { XpDrop } from "../XpDrop";
 import { Projectile, ProjectileOptions } from "./Projectile";
 import { AttackBonuses, Weapon } from "../gear/Weapon";
 import { EquipmentTypes } from "../Equipment";
@@ -15,19 +14,11 @@ export class RangedWeapon extends Weapon {
       new Projectile(this, this.damage, from, to, "range", {
         sound: this.attackSound,
         hitSound: this.attackLandingSound,
+        model: this.projectileModel,
+        ...this.projectileOptions,
         ...options,
       }),
     );
-  }
-
-  grantXp(from: Unit, to: Unit) {
-    if (from.type === UnitTypes.PLAYER && this.damage > 0) {
-      AttackStylesController.controller
-        .getWeaponXpDrops(this.attackStyle(), this.damage, to.xpBonusMultiplier)
-        .forEach(({ skill, xp }) => {
-          from.grantXp(new XpDrop(skill, xp));
-        });
-    }
   }
 
   calculateHitDelay(distance: number) {

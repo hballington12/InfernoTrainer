@@ -14,16 +14,6 @@ export class MeleeWeapon extends Weapon {
     return super.attack(from, to, bonuses);
   }
 
-  grantXp(from: Unit, to: Unit) {
-    if (from.type === UnitTypes.PLAYER && this.damage > 0) {
-      AttackStylesController.controller
-        .getWeaponXpDrops(this.attackStyle(), this.damage, to.xpBonusMultiplier)
-        .forEach(({ skill, xp }) => {
-          from.grantXp(new XpDrop(skill, xp));
-        });
-    }
-  }
-
   _calculatePrayerEffects(from: Unit, to: Unit, bonuses: AttackBonuses) {
     bonuses.effectivePrayers = {};
     if (from.type !== UnitTypes.MOB && from.prayerController) {

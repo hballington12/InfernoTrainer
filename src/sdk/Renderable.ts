@@ -4,24 +4,44 @@ import { Location, Location3 } from "./Location";
 import { Model } from "./rendering/Model";
 
 export interface RenderableListener {
-  animationChanged(id: number);
+  animationChanged(id: number, blend: boolean): Promise<void>;
   modelChanged();
 }
+
+const NIL_OFFSET: Location3[] = [{ x: 0, y: 0, z: 0 }];
 
 export abstract class Renderable {
   private _selected = false;
   private cachedModel: Model | null = null;
   private animationChangeListener: RenderableListener | null = null;
 
+  // in case the animation is set before animationChangeListener is set
+  private queuedAnimationId = -1;
+
   abstract getPerceivedLocation(tickPercent: number): Location3;
 
   /**
-   * return the angle of this renderable in radians.
+   * return the angle of this renderable in radians, around the Z (up) axis.
    * West is zero degrees, and increasing values represent clockwise rotation.
    */
   abstract getPerceivedRotation(tickPercent: number): number;
 
   abstract getTrueLocation(): Location;
+
+  /**
+   * return the pitch angle of this renderable in radians, i.e. how up/down it is pointing
+   * 0 is flat, increasing is up, decreasing is down
+   */
+  getPerceivedPitch(tickPercent: number): number {
+    return 0;
+  }
+
+  /**
+   * allow offsetting the components of a multi-model renderable
+   */
+  getPerceivedOffsets(tickPercent: number): Location3[] {
+    return NIL_OFFSET;
+  }
 
   abstract get size(): number;
 
@@ -37,6 +57,14 @@ export abstract class Renderable {
     return this.size;
   }
 
+  get clickboxHeight(): number | null {
+    return null;
+  }
+
+  get clickboxRadius(): number | null {
+    return null;
+  }
+
   abstract get color(): string;
 
   get colorHex() {
@@ -47,7 +75,7 @@ export abstract class Renderable {
     return true;
   }
 
-  get visible(): boolean {
+  visible(tickPercent): boolean {
     return true;
   }
 
@@ -103,14 +131,20 @@ export abstract class Renderable {
    */
   abstract get animationIndex();
 
-  playAnimation(index: number) {
+  async playAnimation(index: number, blend = false) {
     if (this.animationChangeListener) {
-      this.animationChangeListener.animationChanged(index);
+      return this.animationChangeListener.animationChanged(index, blend);
+    } else {
+      this.queuedAnimationId = index;
     }
   }
 
   setAnimationListener(listener: RenderableListener) {
     this.animationChangeListener = listener;
+    if (this.queuedAnimationId >= 0) {
+      listener.animationChanged(this.queuedAnimationId, false);
+      this.queuedAnimationId = -1;
+    }
   }
 
   clearAnimationListener() {

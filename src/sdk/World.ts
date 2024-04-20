@@ -7,12 +7,19 @@ import { DelayedAction } from "./DelayedAction";
 import { Viewport } from "./Viewport";
 import MetronomeSound from "../assets/sounds/bonk.ogg";
 import { Pathing } from "./Pathing";
+import { InputController } from "./Input";
+import { ControlPanelController } from "./ControlPanelController";
+import { Projectile } from "./weapons/Projectile";
+import { filter } from "lodash";
+
+const CLIENT_TICK_MS = 20;
 
 export class World {
   regions: Region[] = [];
   globalTickCounter = 0;
   isPaused = true;
   tickPercent: number;
+  clientTickPercent: number;
   getReadyTimer = 0;
   deltaTimeSincePause = -1;
   deltaTimeSinceLastTick = -1;
@@ -23,6 +30,8 @@ export class World {
   frameCount = 0;
   tickTimer = 0;
   clientTickTimer = 0;
+
+  clientTickHandle: ReturnType<typeof setTimeout> | null = null;
 
   addRegion(region: Region) {
     this.regions.push(region);
@@ -40,13 +49,29 @@ export class World {
 
       this.deltaTimeSincePause = -1;
     }
+    ControlPanelController.controller.onWorldTick();
     this.browserLoop(window.performance.now());
+    this.clientTickHandle = setInterval(() => this.doClientTick(), CLIENT_TICK_MS);
   }
 
   stopTicking() {
     this.deltaTimeSincePause = window.performance.now() - this.then;
     this.deltaTimeSinceLastTick = window.performance.now() - this.tickTimer;
     this.isPaused = true;
+    clearInterval(this.clientTickHandle);
+    this.clientTickHandle = null;
+  }
+
+  doClientTick() {
+    const now = window.performance.now();
+    const clientTickElapsed = now - this.clientTickTimer;
+    // client tick every 20ms, doing multiple if missed
+    const tickPercent = (now - this.tickTimer) / Settings.tickMs;
+    const clientTicksElapsed = Math.min(50, Math.max(1, Math.floor(clientTickElapsed / CLIENT_TICK_MS)));
+    for (let i = 0; i < clientTicksElapsed; i++) {
+      this.tickClient(tickPercent);
+      this.clientTickTimer = now;
+    }
   }
 
   browserLoop(now: number) {
@@ -56,7 +81,6 @@ export class World {
     }
     const elapsed = now - this.then;
     const tickElapsed = now - this.tickTimer;
-    const clientTickElapsed = now - this.clientTickTimer;
     if (tickElapsed >= 600) {
       this.tickTimer = now;
       if (this.getReadyTimer > 0) {
@@ -65,12 +89,6 @@ export class World {
       this.tickWorld();
     }
     this.tickPercent = (window.performance.now() - this.tickTimer) / Settings.tickMs;
-    // client tick every 20ms, doing multiple if missed
-    const clientTicksElapsed = Math.min(50, Math.floor(clientTickElapsed / 20));
-    for (let i = 0; i < clientTicksElapsed; i++) {
-      this.tickClient(this.tickPercent);
-      this.clientTickTimer = now;
-    }
 
     if (elapsed > this.fpsInterval) {
       this.then = now - (elapsed % this.fpsInterval);
@@ -81,6 +99,8 @@ export class World {
 
   tickWorld(n = 1) {
     this.globalTickCounter++;
+    InputController.controller.onWorldTick();
+    ControlPanelController.controller.onWorldTick();
     this.regions.forEach((region: Region) => this.tickRegion(region));
 
     if (n > 1) {
@@ -120,6 +140,18 @@ export class World {
       });
       region.newMobs.forEach((mob) => mob.attackStep());
     }
+
+    region.projectiles = filter(
+      region.projectiles,
+      (projectile: Projectile) => !projectile.shouldDestroy(),
+    );
+    region.projectiles.forEach((projectile: Projectile) => {
+      projectile.onTick();
+
+      if (projectile.remainingDelay === 0) {
+        projectile.onHit();
+      }
+    });
 
     region.players.forEach((player: Player) => {
       player.movementStep();

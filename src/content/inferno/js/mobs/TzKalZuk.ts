@@ -27,6 +27,7 @@ import HitSound from "../../../../assets/sounds/dragon_hit_410.ogg";
 import ZukAttackSound from "../../assets/sounds/fireblast_cast_and_fire_155.ogg";
 
 const ZukModel = Assets.getAssetUrl("models/7706_33011.glb");
+const ZukBall = Assets.getAssetUrl("models/zuk_projectile.glb");
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -41,13 +42,15 @@ class ZukWeapon extends MagicWeapon {
     return false;
   }
   registerProjectile(from: Unit, to: Unit) {
-    const sound: Sound = new Sound(ZukAttackSound, 0.0025);
+    const sound = new Sound(ZukAttackSound, 0.03);
     if (to.isPlayer) {
       // louder!
       sound.volume = 0.1;
     }
     to.addProjectile(
       new ZukProjectile(this, this.damage, from, to, "range", {
+        model: ZukBall,
+        modelScale: 1 / 128,
         setDelay: 4,
         visualDelayTicks: 2,
         sound,
@@ -77,8 +80,6 @@ export class TzKalZuk extends Mob {
   constructor(region: Region, location: Location, options: UnitOptions) {
     super(region, location, options);
     this.attackDelay = 14;
-
-    // this.currentStats.hitpoint = 80;
 
     this.shield = find(region.mobs.concat(region.newMobs), (mob: Unit) => {
       return mob.mobName() === EntityName.INFERNO_SHIELD;
@@ -196,8 +197,13 @@ export class TzKalZuk extends Mob {
     }
   }
 
+  override visible() {
+    // always visible, even during countdown
+    return true;
+  }
+
   attack() {
-    if (this.aggro.dying >= 0) {
+    if (!this.aggro || this.aggro.dying >= 0) {
       return false;
     }
     let shieldOrPlayer: Unit = this.shield;
@@ -227,10 +233,15 @@ export class TzKalZuk extends Mob {
     return 251;
   }
 
+  override get xpBonusMultiplier() {
+    return 1.575;
+  }
+
   setStats() {
     this.stunned = 8;
 
     this.weapons = {
+      // sound is handled internally in ZukWeapon
       typeless: new ZukWeapon(),
     };
 
@@ -299,10 +310,6 @@ export class TzKalZuk extends Mob {
     return ZukImage;
   }
 
-  get sound() {
-    return null;
-  }
-
   hitSound(damaged) {
     return new Sound(HitSound, 0.1);
   }
@@ -341,7 +348,15 @@ export class TzKalZuk extends Mob {
     await GLTFModel.preload(JadModel);
   }
 
+  get deathAnimationLength() {
+    return 6;
+  }
+
   get attackAnimationId() {
     return 1;
+  }
+
+  override get deathAnimationId() {
+    return 3;
   }
 }

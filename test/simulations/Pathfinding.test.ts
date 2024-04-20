@@ -1,5 +1,6 @@
 import { Player } from "../../src/sdk/Player";
 import { World } from "../../src/sdk/World";
+import { Region } from "../../src/sdk/Region";
 import { Viewport } from "../../src/sdk/Viewport";
 import { Wall } from "../../src/content/Wall";
 import { InvisibleMovementBlocker } from "../../src/content/MovementBlocker";
@@ -120,5 +121,24 @@ describe("pathfinding tests", () => {
     world.tickWorld();
     expect(player.location).toEqual({ x: 14, y: 14 });
     expect(player.pathTargetLocation).toEqual({ x: 14, y: 14 });
+  });
+
+  test("does not path back and forth on the west side", () => {
+    const player = new Player(region, { x: 12, y: 20 });
+    region.addPlayer(player);
+    Viewport.viewport.setPlayer(player);
+
+    player.moveTo(8, 20);
+
+    // Player used to oscillate back and forth on the edges
+    expect(player.location).toEqual({ x: 12, y: 20 });
+    world.tickWorld();
+    expect(player.location).toEqual({ x: 11, y: 20 });
+    world.tickWorld();
+    expect(player.location).toEqual({ x: 11, y: 20 });
+    world.tickWorld();
+    expect(player.location).toEqual({ x: 11, y: 20 });
+    world.tickWorld();
+    expect(player.location).toEqual({ x: 11, y: 20 });
   });
 });

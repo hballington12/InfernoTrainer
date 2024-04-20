@@ -8,6 +8,7 @@ import { Player } from "./Player";
 import { Settings } from "./Settings";
 import { Unit } from "./Unit";
 import { World } from "./World";
+import { Projectile } from "./weapons/Projectile";
 
 interface GroundYItems {
   [key: number]: Item[];
@@ -33,6 +34,8 @@ export abstract class Region {
   newMobs: Mob[] = [];
   mobs: Mob[] = [];
   entities: Entity[] = [];
+  // free-floating projectiles not associated with a mob/player. TODO maybe they all should be here.
+  projectiles: Projectile[] = [];
 
   mapImage: HTMLImageElement;
 
@@ -60,6 +63,7 @@ export abstract class Region {
 
   addPlayer(player: Player) {
     this.players.push(player);
+    player.addedToWorld();
   }
 
   rightClickActions() {
@@ -89,6 +93,7 @@ export abstract class Region {
   addMob(mob: Mob) {
     if (!mob.region.world) {
       this.mobs.push(mob);
+      mob.addedToWorld();
     } else {
       this.newMobs.push(mob);
     }
@@ -110,6 +115,14 @@ export abstract class Region {
 
     item.groundLocation = { x: player.location.x, y: player.location.y };
     this.groundItems[x][y].push(item);
+  }
+
+  addProjectile(projectile: Projectile) {
+    this.projectiles.push(projectile);
+  }
+
+  removeProjectile(projectile: Projectile) {
+    remove(this.projectiles, projectile);
   }
 
   getName(): string {
@@ -175,7 +188,6 @@ export abstract class Region {
 
   // calls preload on all renderable children
   async preload() {
-    console.log("preloading region", this.entities, this.mobs, this.players);
     await Promise.all(this.entities.map((entity) => entity.preload()));
     await Promise.all(this.mobs.map((mob) => mob.preload()));
     await Promise.all(this.newMobs.map((mob) => mob.preload()));

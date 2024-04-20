@@ -30,6 +30,7 @@ import { Player } from "./Player";
 import { CollisionType } from "./Collision";
 import { Renderable } from "./Renderable";
 import { Sound, SoundCache } from "./utils/SoundCache";
+import { DelayedAction } from "./DelayedAction";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum UnitTypes {
@@ -119,7 +120,10 @@ export abstract class Unit extends Renderable {
   equipment: UnitEquipment = new UnitEquipment();
   setEffects: (typeof SetEffect)[] = [];
   autoRetaliate = false;
-  spawnDelay = 0;
+  age = 0;
+  lastRotation = 0;
+  hasDiedAndAwaitingRemoval = false;
+  nulledTicks = 0;
 
   get deathAnimationLength(): number {
     return 3;
@@ -137,8 +141,16 @@ export abstract class Unit extends Renderable {
     return false;
   }
 
+  get xpBonusMultiplier() {
+    return 1.0;
+  }
+
   mobName(): EntityName {
     return null;
+  }
+
+  get isNulled() {
+    return this.nulledTicks > 0;
   }
 
   get combatLevel() {
@@ -189,7 +201,7 @@ export abstract class Unit extends Renderable {
     this.perceivedLocation = location;
     this.location = location;
     this.setStats();
-    this.spawnDelay = options.spawnDelay || 0;
+    this.age = options.spawnDelay || 0;
     this.autoRetaliate = true;
     this.currentStats.hitpoint = this.stats.hitpoint;
 
@@ -209,6 +221,7 @@ export abstract class Unit extends Renderable {
   grantXp(xpDrop: XpDrop) {
     // Override me
   }
+
   setStats() {
     // Override me
   }
@@ -219,23 +232,22 @@ export abstract class Unit extends Renderable {
 
   attackStep() {
     // Override me, called after all movement has been resolved
+    this.nulledTicks--;
     this.attackDelay--;
+    this.lastRotation = this.getPerceivedRotation(0);
   }
 
   // called when the unit has attacked
   didAttack() {
     this.attackDelay = this.attackSpeed;
-    this.playAttackSound();
     this.playAttackAnimation();
-  }
-
-  playAttackSound() {
-    // override me
   }
 
   playAttackAnimation() {
     if (this.attackAnimationId) {
-      this.playAnimation(this.attackAnimationId);
+      // only blend if not idle
+      const doBlend = this.animationIndex !== this.idlePoseId && this.canBlendAttackAnimation;
+      this.playAnimation(this.attackAnimationId, doBlend);
     }
   }
 
@@ -255,7 +267,11 @@ export abstract class Unit extends Renderable {
         perceivedLocation.y - this.aggro.size / 2,
       );
     }
-    return 0;
+    return this.lastRotation;
+  }
+
+  addedToWorld() {
+    // override me
   }
 
   getTrueLocation() {
@@ -434,16 +450,18 @@ export abstract class Unit extends Renderable {
 
   /** Sounds **/
 
-  get sound(): Sound | null {
-    return null;
-  }
-
+  // sound to play when hit
   hitSound(damaged: boolean): Sound | null {
     return null;
   }
 
   get color(): string {
     return "#FFFFFF00";
+  }
+
+  get healthScale(): number {
+    // the server usually only sends hitpoints as a fraction where this is the denominator.
+    return Math.min(this.stats.hitpoint, 30);
   }
 
   shouldDestroy() {
@@ -524,7 +542,7 @@ export abstract class Unit extends Renderable {
   }
 
   addProjectile(projectile: Projectile) {
-    if (this.spawnDelay > 0 && this.autoRetaliate && !this.aggro) {
+    if (this.age > 0 && this.autoRetaliate && !this.aggro) {
       this.setAggro(projectile.from);
     }
     this.incomingProjectiles.push(projectile);
@@ -538,9 +556,32 @@ export abstract class Unit extends Renderable {
     // override pls
   }
 
+  cancelDeath() {
+    // e.g. when revived
+    this.hasDiedAndAwaitingRemoval = false;
+    this.dying = -1;
+  }
+
   dead() {
     this.perceivedLocation = this.location;
     this.dying = this.deathAnimationLength;
+    this.aggro = null;
+    this.hasDiedAndAwaitingRemoval = true;
+    if (this.deathAnimationId) {
+      DelayedAction.registerDelayedAction(
+        new DelayedAction(
+          () =>
+            this.playAnimation(this.deathAnimationId, false).then(() => {
+              if (this.hasDiedAndAwaitingRemoval) {
+                // can be cancelled
+                this.dying = 0;
+                this.detectDeath();
+              }
+            }),
+          1,
+        ),
+      );
+    }
   }
 
   detectDeath() {
@@ -561,21 +602,9 @@ export abstract class Unit extends Renderable {
     this.lastHitAgo++;
     this.incomingProjectiles = filter(
       this.incomingProjectiles,
-      (projectile: Projectile) => projectile.remainingDelay > -1,
+      (projectile: Projectile) => !projectile.shouldDestroy(),
     );
     this.incomingProjectiles.forEach((projectile) => {
-      projectile.currentLocation = {
-        x: Pathing.linearInterpolation(
-          projectile.currentLocation.x,
-          projectile.to.location.x + projectile.to.size / 2,
-          1 / (projectile.remainingDelay + 1),
-        ),
-        y: Pathing.linearInterpolation(
-          projectile.currentLocation.y,
-          projectile.to.location.y - projectile.to.size / 2 + 1,
-          1 / (projectile.remainingDelay + 1),
-        ),
-      };
       projectile.onTick();
 
       if (projectile.remainingDelay === 0) {
@@ -645,8 +674,9 @@ export abstract class Unit extends Renderable {
     context.fillStyle = "red";
     context.fillRect((-this.size / 2) * scale, -(this.size / 2) * scale, scale * this.size, 5);
 
+    const healthRatio = Math.min(1, Math.ceil((this.currentStats.hitpoint / this.stats.hitpoint) * this.healthScale) / this.healthScale);
     context.fillStyle = "lime";
-    const w = Math.min(1, this.currentStats.hitpoint / this.stats.hitpoint) * (scale * this.size);
+    const w = healthRatio * (scale * this.size);
     context.fillRect((-this.size / 2) * scale, (-this.size / 2) * scale, w, 5);
   }
 
@@ -734,7 +764,11 @@ export abstract class Unit extends Renderable {
     return null;
   }
 
-  get xpBonusMultiplier() {
-    return 1.0;
+  get canBlendAttackAnimation(): boolean {
+    return false;
+  }
+
+  get deathAnimationId(): number | null {
+    return null;
   }
 }

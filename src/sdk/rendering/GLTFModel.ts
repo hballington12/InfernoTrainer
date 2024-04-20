@@ -5,7 +5,7 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module";
 
 import { Model } from "./Model";
 import { Renderable, RenderableListener } from "../Renderable";
-import { Location } from "../Location";
+import { Location, Location3 } from "../Location";
 import { Viewport } from "../Viewport";
 import { Viewport3d } from "../Viewport3d";
 import { drawLineNormally, drawLineOnTop } from "./RenderUtils";
@@ -17,6 +17,9 @@ const OUTLINE_SELECTED = 0xff0000;
 // global loader across models
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
+
+// cache a copy of each model
+const globalModelCache: {[name: string]: GLTF} = {};
 
 /**
  * Render the model using one or more GLTF models. If there are multiple models, they are drawn superimposed on the same spot and are expected
@@ -54,13 +57,17 @@ export class GLTFModel implements Model, RenderableListener {
   // parent object for all models loaded into this
   private loadedModel: THREE.Object3D | null = null;
   private hasInitialisedModel = false;
-  private modelCache: { [name: string]: GLTF } = {};
   private mixers: THREE.AnimationMixer[] = [];
 
   private lastPoseId = -1;
   private playingAnimationId = -1;
+  private playingAnimationCanBlend = false;
+  private playingAnimationPromiseResolve = null;
   // first index is the model ID, second index is the animation ID.
   private animations: THREE.AnimationAction[][] = [];
+
+  // models are loaded and inserted into `loadedModel` in indeterminate orders, so we save the index of each model
+  private modelOrder: number[] = [];
 
   constructor(
     private renderable: Renderable,
@@ -106,21 +113,23 @@ export class GLTFModel implements Model, RenderableListener {
     this.clickHull.visible = false;
   }
 
-  animationChanged(id: number) {
-    this.startPlayingAnimation(id);
+  async animationChanged(id, blend) {
+    return this.startPlayingAnimation(id, blend);
   }
 
   modelChanged() {
     if (!this.loadedModel) {
       return;
     }
+    // TODO: handle model order that gets out of whack
     // TODO: what if get3dModel() now returns something other than GLTFModel? Bad times...
     const newModels = (this.renderable.get3dModel() as GLTFModel).models;
     const toRemove = this.models.filter((model) => !newModels.includes(model));
     const toAdd = newModels.filter((model) => !this.models.includes(model));
     toRemove.forEach((name) => this.loadedModel.remove(this.loadedModel.getObjectByName(name)));
     this.models = newModels;
-    toAdd.forEach((name) => this.loadAndAddSingleModel(this.loadedModel, name));
+    // (index is wrong here...)
+    toAdd.forEach((name, index) => this.loadAndAddSingleModel(this.loadedModel, name, index));
   }
 
   stopCurrentAnimation() {
@@ -128,56 +137,100 @@ export class GLTFModel implements Model, RenderableListener {
     this.mixers.forEach((mixer) => mixer.stopAllAction());
   }
 
-  startPlayingAnimation(id: number) {
-    this.stopCurrentAnimation();
+  /**
+   *
+   * @param id id (in the animation file) to play
+   * @param blend blend the new animation with the pose animation
+   */
+  startPlayingAnimation(id: number, blend = false) {
+    if (!blend) {
+      this.stopCurrentAnimation();
+      this.animations.forEach((animationsForModel) => {
+        animationsForModel.forEach((animation) => animation.setEffectiveWeight(1.0));
+      });
+    } else {
+      this.animations.forEach((animationsForModel) => {
+        animationsForModel.forEach((animation) => animation.setEffectiveWeight(0.5));
+      });
+    }
     this.playingAnimationId = id;
-    this.animations.forEach((animationsForModel, i) => {
+    this.playingAnimationCanBlend = blend;
+    this.animations.forEach((animationsForModel) => {
+      // play the animation for each part of the body
       const newAnimation = animationsForModel[id];
+      newAnimation.setEffectiveWeight(blend ? 1 : 1.0);
       newAnimation.stop().setLoop(THREE.LoopOnce, 1).play();
     });
     // reset the timer of the mixers because it seems to bug out and show the first frame sometimes
     // suspect that it has to do with the mixer time exceeding the length of the animation?
     this.mixers.forEach((mixerForModel) => mixerForModel.setTime(0));
+    return new Promise<void>((resolve) => {
+      this.playingAnimationPromiseResolve = resolve;
+      return;
+    });
   }
 
-  onAnimationFinished() {
+  onAnimationFinished(action?: THREE.AnimationAction) {
     this.stopCurrentAnimation();
     const nextAnimIndex = this.renderable.animationIndex;
-    this.lastPoseId = nextAnimIndex;
-    this.playingAnimationId = -1;
 
     this.animations.forEach((animationsForModel, i) => {
       const newAnimation = animationsForModel[nextAnimIndex];
+      if (this.playingAnimationCanBlend) {
+        newAnimation.setEffectiveWeight(1.0);
+      }
+      // play the fallback/pose animation
+      newAnimation.stop().setLoop(THREE.LoopRepeat, Number.POSITIVE_INFINITY).play();
+    });
+    this.playingAnimationId = -1;
+    this.playingAnimationCanBlend = false;
+    if (this.playingAnimationPromiseResolve) {
+      this.playingAnimationPromiseResolve();
+      this.playingAnimationPromiseResolve = null;
+    }
+  }
+
+  onPoseChanged(newPoseId) {
+    this.animations.forEach((animationsForModel, i) => {
+      const lastAnimation = animationsForModel[this.lastPoseId];
+      if (lastAnimation) {
+        lastAnimation.stop();
+      }
+      if (this.playingAnimationId >= 0 && !this.playingAnimationCanBlend) {
+        return;
+      }
+      const newAnimation = animationsForModel[newPoseId];
       // play the fallback/pose animation
       newAnimation.stop().setLoop(THREE.LoopRepeat, Number.POSITIVE_INFINITY).play();
     });
   }
 
-  loadAndAddSingleModel(target, model) {
-    if (this.modelCache[model]) {
-      target.add(this.modelCache[model].scene);
-      return;
-    }
-    loader.load(model, (gltf: GLTF) => {
-      this.modelCache[model] = gltf;
+  loadAndAddSingleModel(target, model, index) {
+    const processGltf = (gltf: GLTF, clone = false) => {
       const scale = this.scale;
       gltf.scene.name = model;
       // make adjustments
       gltf.scene.scale.set(scale, scale, scale);
-      target.add(gltf.scene);
+      const { animations } = gltf;
+      let { scene } = gltf;
+      if (clone) {
+        scene = scene.clone();
+      }
+      target.add(scene);
+      const size = new THREE.Vector3();
+      new THREE.Box3().setFromObject(scene).getSize(size);
+      const clickboxHeight = this.renderable.clickboxHeight ?? Math.max(this.renderable.size, 0.4 * size.y);
+      const clickboxRadius = this.renderable.clickboxRadius ?? this.renderable.size * 0.4;
+      this.hullGeometry.scale(clickboxRadius, clickboxHeight, clickboxRadius);
+      this.hullGeometry.translate(0, clickboxHeight / 2 - 0.49, 0);
       // load and start animating
-      if (gltf.animations.length === 0) {
+      if (animations.length === 0) {
         return;
       }
-      const size = new THREE.Vector3();
-      new THREE.Box3().setFromObject(gltf.scene).getSize(size);
-      const clickboxHeight = Math.max(this.renderable.size, 0.4 * size.y);
-      this.hullGeometry.scale(0.4 * this.renderable.size, clickboxHeight, 0.4 * this.renderable.size);
-      this.hullGeometry.translate(0, clickboxHeight / 2 - 0.49, 0);
-      const mixer = new THREE.AnimationMixer(gltf.scene);
+      const mixer = new THREE.AnimationMixer(scene);
       this.mixers.push(mixer);
       this.animations.push(
-        gltf.animations.map((animation) => {
+        animations.map((animation) => {
           const action = mixer.clipAction(animation);
           action.clampWhenFinished = true;
           action.zeroSlopeAtEnd = false;
@@ -189,19 +242,38 @@ export class GLTFModel implements Model, RenderableListener {
       // add listener to first mixer only
       if (this.mixers.length === 1) {
         mixer.addEventListener("finished", (e) => {
-          this.onAnimationFinished();
+          this.onAnimationFinished(e.action);
         });
       }
-    });
+      this.modelOrder.push(index);
+    }
+    if (model in globalModelCache) {
+      // prevents reloading the model from file
+      processGltf(globalModelCache[model], true);
+    } else {
+      loader.load(model, (gltf: GLTF) => {
+        globalModelCache[model] = gltf;
+        processGltf(gltf);
+      });
+    }
   }
 
   initialiseWholeModel() {
     const preparingMesh = new THREE.Object3D();
-    this.models.forEach((model) => this.loadAndAddSingleModel(preparingMesh, model));
+    this.models.forEach((model, index) => this.loadAndAddSingleModel(preparingMesh, model, index));
     this.loadedModel = preparingMesh;
   }
 
-  draw(scene: THREE.Scene, clockDelta: number, tickPercent: number, location: Location, rotation: number) {
+  draw(
+    scene: THREE.Scene,
+    clockDelta: number,
+    tickPercent: number,
+    location: Location3,
+    rotation: number,
+    pitch: number,
+    visible: boolean,
+    modelOffsets: Location3[],
+  ) {
     if (!this.hasInitialisedModel) {
       this.initialiseWholeModel();
       this.hasInitialisedModel = true;
@@ -216,18 +288,23 @@ export class GLTFModel implements Model, RenderableListener {
       scene.add(this.clickHull);
     }
 
+    this.outline.visible = this.renderable.drawOutline && visible;
+    if (this.loadedModel) {
+      this.loadedModel.visible = visible;
+    }
     this.outlineMaterial.color.setHex(this.renderable.selected ? OUTLINE_SELECTED : OUTLINE_NORMAL);
     if (this.renderable.selected) {
       drawLineOnTop(this.outline);
     } else {
       drawLineNormally(this.outline);
     }
-    if (this.renderable.animationIndex !== this.lastPoseId && this.playingAnimationId < 0) {
+    if (this.renderable.animationIndex !== this.lastPoseId) {
       // start a new pose if the pose index changes and we're not currently playing an animation
-      this.onAnimationFinished();
+      this.onPoseChanged(this.renderable.animationIndex);
+      this.lastPoseId = this.renderable.animationIndex;
     }
 
-    const { x, y } = location;
+    const { x, y, z } = location;
     this.outline.position.x = x;
     this.outline.position.y = -0.49;
     this.outline.position.z = y;
@@ -249,9 +326,20 @@ export class GLTFModel implements Model, RenderableListener {
       const { size } = this.renderable;
       const adjustedRotation = rotation + Math.PI / 2;
       this.loadedModel.position.x = x + size / 2 + this.originOffset.x;
-      this.loadedModel.position.y = this.verticalOffset;
+      this.loadedModel.position.y = z + this.verticalOffset;
       this.loadedModel.position.z = y - size / 2 + this.originOffset.y;
-      this.loadedModel.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), adjustedRotation);
+      this.loadedModel.rotation.order = "YXZ";
+      this.loadedModel.rotation.set(pitch, adjustedRotation, 0);
+
+      this.loadedModel.children.forEach((child, idx) => {
+        const insertionIdx = this.modelOrder[idx];
+        if (modelOffsets[insertionIdx]) {
+          const offset = modelOffsets[insertionIdx];
+          child.position.set(offset.x, offset.z, offset.y);
+        } else {
+          child.position.set(0, 0, 0);
+        }
+      });
     }
   }
 

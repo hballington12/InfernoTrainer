@@ -24,6 +24,8 @@ const SPRITE_SCALE = 32;
 const MIN_PITCH = -1;
 const MAX_PITCH = 0.1;
 
+const FLOOR_Y_POS = -0.5;
+
 export class Viewport3d implements ViewportDelegate {
   private canvas: OffscreenCanvas;
   private uiCanvas: OffscreenCanvas;
@@ -196,7 +198,7 @@ export class Viewport3d implements ViewportDelegate {
     /*const light = new THREE.PointLight(0xffffaa, 1200);
     light.position.set(region.width / 2, 30, region.height / 2);
     this.scene.add(light);*/
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffaa);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff);
     hemiLight.position.set(0, 100, 0);
     this.scene.add(hemiLight);
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -218,7 +220,7 @@ export class Viewport3d implements ViewportDelegate {
       side: THREE.FrontSide,
     });
     floorGeometry.rotateX(-Math.PI / 2);
-    floorGeometry.translate(region.width / 2, -0.5, region.height / 2 - 1);
+    floorGeometry.translate(region.width / 2, FLOOR_Y_POS, region.height / 2 - 1);
     const plane = new THREE.Mesh(floorGeometry, floorMaterial);
     plane.userData.clickable = true;
     // used for right-click walk here
@@ -302,6 +304,16 @@ export class Viewport3d implements ViewportDelegate {
       projectiles.push(...mob.incomingProjectiles);
     });
 
+    region.projectiles.forEach((projectile: Projectile) => {
+      let actor = this.knownActors.get(projectile);
+      if (!actor) {
+        actor = new Actor(projectile);
+        this.knownActors.set(projectile, actor);
+      }
+      // Add all projectiles to scene
+      projectiles.push(projectile);
+    });
+
     projectiles.forEach((projectile) => {
       let actor = this.knownActors.get(projectile);
       if (!actor) {
@@ -348,9 +360,9 @@ export class Viewport3d implements ViewportDelegate {
       );
       return { x, y };
     };
-    const units: Unit[] = [...region.players, ...region.mobs];
+    const units: Unit[] = [...region.players, ...(world.getReadyTimer <= 0 ? region.mobs : [])];
 
-    const renderables: Renderable[] = (units as Renderable[]).concat(region.entities).concat(region.mobs);
+    const renderables: Renderable[] = (units as Renderable[]).concat(region.entities);
 
     renderables.forEach((r) => {
       r.drawUILayer(world.tickPercent, get2dOffset(r), this.uiCanvasContext, SPRITE_SCALE, false);
@@ -375,26 +387,25 @@ export class Viewport3d implements ViewportDelegate {
     const rayY = -(offsetY / height) * 2 + 1;
 
     this.raycaster.setFromCamera(new THREE.Vector2(rayX, rayY), this.camera);
+    // check intersection of the ray and the flor plane
+    const floorPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), FLOOR_Y_POS);
+    const floor = new THREE.Vector3(0, 0, 0);
+    this.raycaster.ray.intersectPlane(floorPlane, floor);
+
+    this.selectedTile = {
+      x: Math.floor(floor.x) + 0.5,
+      y: Math.floor(floor.z) + 1.5,
+    };
     const intersections = this.raycaster.intersectObjects(
       this.scene.children.filter((c) => c.userData.clickable === true),
     );
 
-    if (intersections.length === 0) {
-      return null;
-    }
-    // check intersection of floor
-    const floor = intersections.find((i) => i.object.userData.isFloor);
-
-    if (floor) {
-      this.selectedTile = {
-        x: Math.floor(floor.point.x) + 0.5,
-        y: Math.floor(floor.point.z) + 1.5,
-      };
-    }
+    // check if there were any NPCs on the way.
     const mobs = intersections
       .filter((i) => i.object.userData.unit instanceof Mob)
       .map((i) => i.object.userData.unit as Mob);
 
+    // Note: we currently only handle clicking on mobs
     if (mobs.length > 0) {
       return {
         type: "entities" as const,

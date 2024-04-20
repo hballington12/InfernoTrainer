@@ -9,12 +9,12 @@ import { Weapon } from "./gear/Weapon";
 import { Unit, UnitBonuses, UnitOptions, UnitStats, UnitTypes } from "./Unit";
 import { Location } from "./Location";
 import { Collision } from "./Collision";
-import { SoundCache } from "./utils/SoundCache";
 import { Viewport } from "./Viewport";
 import { Random } from "./Random";
 import { Region } from "./Region";
 import { CanvasSpriteModel } from "./rendering/CanvasSpriteModel";
 import { Model } from "./rendering/Model";
+import { InputController } from "./Input";
 
 export enum AttackIndicators {
   NONE = 0,
@@ -153,8 +153,8 @@ export class Mob extends Unit {
     }
     this.processIncomingAttacks();
 
-    this.spawnDelay--;
-    if (this.spawnDelay > 0) {
+    this.age--;
+    if (this.age > 0) {
       return;
     }
     this.perceivedLocation = { x: this.location.x, y: this.location.y };
@@ -271,7 +271,7 @@ export class Mob extends Unit {
   override attackStep() {
     super.attackStep();
 
-    if (this.spawnDelay > 0) {
+    if (this.age > 0) {
       return;
     }
     if (this.dying === 0) {
@@ -293,7 +293,7 @@ export class Mob extends Unit {
     this.hadLOS = this.hasLOS;
     this.setHasLOS();
 
-    if (this.canAttack() === false) {
+    if (!this.aggro || this.canAttack() === false) {
       return;
     }
 
@@ -349,26 +349,12 @@ export class Mob extends Unit {
     return true;
   }
 
-  get consumesSpace(): Unit {
-    return this;
+  visible() {
+    return this.region.world.getReadyTimer <= 0;
   }
 
-  override playAttackSound() {
-    if (Settings.playsAudio && this.sound) {
-      let attemptedVolume =
-        1 /
-        Pathing.dist(
-          Viewport.viewport.player.location.x,
-          Viewport.viewport.player.location.y,
-          this.location.x,
-          this.location.y,
-        );
-      attemptedVolume = Math.min(1, Math.max(0, Math.sqrt(attemptedVolume)));
-      SoundCache.play({
-        src: this.sound.src,
-        volume: attemptedVolume * this.sound.volume,
-      });
-    }
+  get consumesSpace(): Unit {
+    return this;
   }
 
   override get combatLevel() {
@@ -388,9 +374,7 @@ export class Mob extends Unit {
         ],
         action: () => {
           Viewport.viewport.clickController.redClick();
-          Viewport.viewport.clickController.sendToServer(() =>
-            Viewport.viewport.clickController.playerAttackClick(this),
-          );
+          InputController.controller.queueAction(() => Viewport.viewport.clickController.playerAttackClick(this));
         },
       },
     ];

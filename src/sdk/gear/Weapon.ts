@@ -1,7 +1,7 @@
 "use strict";
 
 import { BasePrayer } from "../BasePrayer";
-import { Unit } from "../Unit";
+import { Unit, UnitTypes } from "../Unit";
 import { ImageLoader } from "../utils/ImageLoader";
 import { Equipment } from "../Equipment";
 import { Player } from "../Player";
@@ -13,6 +13,7 @@ import { AttackStylesController, AttackStyle, AttackStyleTypes } from "../Attack
 import { Random } from "../Random";
 import { Sound, SoundCache } from "../utils/SoundCache";
 import { PlayerAnimationIndices } from "../rendering/GLTFAnimationConstants";
+import { XpDrop } from "../XpDrop";
 
 interface EffectivePrayers {
   magic?: BasePrayer;
@@ -43,6 +44,10 @@ export class Weapon extends Equipment {
   lastHitHit = false;
   override selected = false;
   override inventorySprite: HTMLImageElement = ImageLoader.createImage(this.inventoryImage);
+
+  constructor(protected projectileOptions: ProjectileOptions = {}) {
+    super();
+  }
 
   attackStyles() {
     return [];
@@ -82,11 +87,9 @@ export class Weapon extends Equipment {
   specialAttackDrain(): number {
     return 50;
   }
+  
   specialAttack(from: Unit, to: Unit, bonuses: AttackBonuses = {}, options: ProjectileOptions = {}) {
     // Override me
-    if (this.specialAttackSound) {
-      SoundCache.play(this.specialAttackSound);
-    }
   }
 
   override inventoryLeftClick(player: Player) {
@@ -181,7 +184,7 @@ export class Weapon extends Equipment {
     }
 
     this.grantXp(from, to);
-    this.registerProjectile(from, to, bonuses);
+    this.registerProjectile(from, to, bonuses, options);
     return true;
   }
 
@@ -218,7 +221,13 @@ export class Weapon extends Equipment {
   }
 
   grantXp(from: Unit, to: Unit) {
-    // weapons implement this at the type tier
+    if (from.type === UnitTypes.PLAYER && this.damage > 0) {
+      AttackStylesController.controller
+        .getWeaponXpDrops(this.attackStyle(), this.damage, to.xpBonusMultiplier)
+        .forEach(({ skill, xp }) => {
+          from.grantXp(new XpDrop(skill, xp));
+        });
+    }
   }
 
   _calculatePrayerEffects(from: Unit, to: Unit, bonuses: AttackBonuses) {
@@ -230,6 +239,8 @@ export class Weapon extends Equipment {
       new Projectile(this, this.damage, from, to, bonuses.attackStyle, {
         sound: this.attackSound,
         hitSound: this.attackLandingSound,
+        model: this.projectileModel,
+        ...this.projectileOptions,
         ...options,
       }),
     );
@@ -280,6 +291,10 @@ export class Weapon extends Equipment {
   }
 
   get attackLandingSound(): Sound | null {
+    return null;
+  }
+
+  get projectileModel(): string | null {
     return null;
   }
 

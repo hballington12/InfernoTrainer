@@ -42,7 +42,7 @@ export class JalMejRah extends Mob {
     this.stunned = 1;
 
     this.weapons = {
-      range: new JalMejRahWeapon(),
+      range: new JalMejRahWeapon({ sound: new Sound(BatSound, 0.5) }),
     };
 
     // non boosted numbers
@@ -99,10 +99,6 @@ export class JalMejRah extends Mob {
     return BatImage;
   }
 
-  get sound() {
-    return new Sound(BatSound, 0.75);
-  }
-
   attackStyleForNewAttack() {
     return "range";
   }
@@ -117,5 +113,9 @@ export class JalMejRah extends Mob {
 
   override get attackAnimationId() {
     return 1;
+  }
+
+  override get deathAnimationId() {
+    return 3;
   }
 }
