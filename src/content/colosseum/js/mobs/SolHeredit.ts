@@ -66,6 +66,8 @@ export class SolHeredit extends Mob {
   private firstSpear = true;
   private firstShield = true;
 
+  adjacentTimer = 0;
+
   mobName(): EntityName {
     return EntityName.SOL_HEREDIT;
   }
@@ -170,7 +172,15 @@ export class SolHeredit extends Mob {
     const [tx, ty] = this.getClosestTileTo(this.aggro.location.x, this.aggro.location.y);
     const dx = this.aggro.location.x - tx,
       dy = this.aggro.location.y - ty;
-    this.hasLOS = Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+    const isAdjacent = Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+    // boss must be adjacent for at least 1 tick to attack.
+    if (isAdjacent) {
+      this.hasLOS = this.adjacentTimer > 0;
+      ++this.adjacentTimer;
+    } else {
+      this.adjacentTimer = 0;
+      this.hasLOS = false;
+    }
 
     if (this.canAttack() === false) {
       return;
