@@ -37,6 +37,7 @@ export class TileMarkerModel implements Model {
       scene.add(this.outline);
     }
     const { x, y } = location;
+    this.outline.visible = this.renderable.visible(tickPercent);
     this.outline.position.x = x;
     this.outline.position.y = -0.49;
     this.outline.position.z = y;

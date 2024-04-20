@@ -12,6 +12,8 @@ import { ColosseumLoadout } from "./ColosseumLoadout";
 import { ColosseumScene } from "./ColosseumScene";
 import { SolHeredit as SolHeredit } from "./mobs/SolHeredit";
 
+import SidebarContent from "../sidebar.html";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class ColosseumRegion extends Region {
@@ -96,7 +98,7 @@ export class ColosseumRegion extends Region {
     // create player
     const player = new Player(this, {
       x: 27,
-      y: 25,
+      y: 30,
     });
 
     this.addPlayer(player);
@@ -105,7 +107,7 @@ export class ColosseumRegion extends Region {
     loadout.setStats(player);
     player.setUnitOptions(loadout.getLoadout());
 
-    this.addMob(new SolHeredit(this, { x: 25, y: 14 }, { aggro: player }));
+    this.addMob(new SolHeredit(this, { x: 25, y: 27 }, { aggro: player }));
 
     // Add 3d scene
     if (Settings.use3dView) {
@@ -118,6 +120,6 @@ export class ColosseumRegion extends Region {
   }
 
   getSidebarContent() {
-    return "READ ME: this is a work in progress";
+    return SidebarContent;
   }
 }

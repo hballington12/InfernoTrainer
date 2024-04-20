@@ -3,23 +3,68 @@
 import { MagicWeapon } from "../../../../sdk/weapons/MagicWeapon";
 import { MeleeWeapon } from "../../../../sdk/weapons/MeleeWeapon";
 import { Mob, AttackIndicators } from "../../../../sdk/Mob";
-import AttackSound from "../../../../assets/sounds/scythe_swing_2524.ogg";
 import { UnitBonuses } from "../../../../sdk/Unit";
 import { Collision } from "../../../../sdk/Collision";
 import { EntityName } from "../../../../sdk/EntityName";
 import { Projectile } from "../../../../sdk/weapons/Projectile";
-import { Sound } from "../../../../sdk/utils/SoundCache";
-import HitSound from "../../../../assets/sounds/dragon_hit_410.ogg";
+import { Sound, SoundCache } from "../../../../sdk/utils/SoundCache";
 
 import { GLTFModel } from "../../../../sdk/rendering/GLTFModel";
 import { Assets } from "../../../../sdk/utils/Assets";
 import { Random } from "../../../../sdk/Random";
 import _ from "lodash";
+import { DelayedAction } from "../../../../sdk/DelayedAction";
+import { SolGroundSlam } from "../entities/SolGroundSlam";
 
 export const SolHereditModel = Assets.getAssetUrl("models/sol.glb");
 
+import SpearStart from "../../assets/sounds/8147_spear.ogg";
+import SpearEnd from "../../assets/sounds/8047_spear_swing.ogg";
+import ShieldStart from "../../assets/sounds/8150_shield_start.ogg";
+import ShieldEnd from "../../assets/sounds/8145_shield_stomp.ogg";
+
+enum SolAnimations {
+  Idle = 0,
+  Walk = 1,
+  SpearFast = 2,
+  SpearSlow = 3,
+  Grapple = 4,
+  Shield = 5,
+  TripleAttack = 6,
+  TripleAttackFast = 7,
+  Death = 8,
+}
+
+enum AttackDirection {
+  West,
+  East,
+  North,
+  South,
+  NorthEast,
+  NorthWest,
+  SouthEast,
+  SouthWest,
+}
+
+const DIRECTIONS = [
+  { dx: -1, dy: 0 },
+  { dx: 1, dy: 0 },
+  { dx: 0, dy: -1 },
+  { dx: 0, dy: 1 },
+  { dx: 1, dy: -1 },
+  { dx: -1, dy: -1 },
+  { dx: 1, dy: 1 },
+  { dx: -1, dy: 1 },
+];
+
+const SPEAR_START = new Sound(SpearStart, 0.1);
+const SPEAR_END = new Sound(SpearEnd, 0.1);
+const SHIELD_START = new Sound(ShieldStart, 0.1);
+const SHIELD_END = new Sound(ShieldEnd, 0.1);
 export class SolHeredit extends Mob {
   shouldRespawnMobs: boolean;
+  private firstSpear = true;
+  private firstShield = true;
 
   mobName(): EntityName {
     return EntityName.SOL_HEREDIT;
@@ -44,14 +89,13 @@ export class SolHeredit extends Mob {
       stab: new MeleeWeapon(),
     };
 
-    // non boosted numbers
     this.stats = {
-      attack: 370,
-      strength: 510,
-      defence: 260,
-      range: 510,
+      attack: 350,
+      strength: 400,
+      defence: 200,
+      range: 350,
       magic: 300,
-      hitpoint: 1200,
+      hitpoint: 1500,
     };
 
     // with boosts
@@ -61,22 +105,22 @@ export class SolHeredit extends Mob {
   get bonuses(): UnitBonuses {
     return {
       attack: {
-        stab: 0,
+        stab: 250,
         slash: 0,
         crush: 0,
         magic: 80,
-        range: 0,
+        range: 150,
       },
       defence: {
-        stab: 0,
-        slash: 0,
-        crush: 0,
-        magic: 0,
-        range: 0,
+        stab: 65,
+        slash: 5,
+        crush: 30,
+        magic: 750,
+        range: 825,
       },
       other: {
         meleeStrength: 0,
-        rangedStrength: 0,
+        rangedStrength: 5,
         magicDamage: 1.0,
         prayer: 0,
       },
@@ -84,6 +128,7 @@ export class SolHeredit extends Mob {
   }
 
   get attackSpeed() {
+    // irrelevant
     return 7;
   }
 
@@ -93,14 +138,6 @@ export class SolHeredit extends Mob {
 
   get size() {
     return 5;
-  }
-
-  get sound() {
-    return new Sound(AttackSound);
-  }
-
-  hitSound(damaged) {
-    return new Sound(HitSound, 0.1);
   }
 
   attackStyleForNewAttack() {
@@ -123,43 +160,257 @@ export class SolHeredit extends Mob {
     context.rotate(tickPercent * Math.PI * 2);
   }
 
-  respawnLocation(mobToResurrect: Mob) {
-    for (let x = 15 + 11; x < 22 + 11; x++) {
-      for (let y = 10 + 14; y < 23 + 14; y++) {
-        if (!Collision.collidesWithAnyMobs(this.region, x, y, mobToResurrect.size)) {
-          if (!Collision.collidesWithAnyEntities(this.region, x, y, mobToResurrect.size)) {
-            return { x, y };
-          }
-        }
-      }
-    }
-
-    return { x: 21, y: 22 };
-  }
-
   attackIfPossible() {
     this.attackStyle = this.attackStyleForNewAttack();
 
     this.attackFeedback = AttackIndicators.NONE;
 
     this.hadLOS = this.hasLOS;
-    this.setHasLOS();
+    // override LOS check to attack melee diagonally
+    const [tx, ty] = this.getClosestTileTo(this.aggro.location.x, this.aggro.location.y);
+    const dx = this.aggro.location.x - tx,
+      dy = this.aggro.location.y - ty;
+    this.hasLOS = Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
 
     if (this.canAttack() === false) {
       return;
     }
 
-    const isUnderAggro = Collision.collisionMath(
-      this.location.x,
-      this.location.y,
-      this.size,
-      this.aggro.location.x,
-      this.aggro.location.y,
-      1,
-    );
+    if (this.hasLOS && this.attackDelay <= 0) {
+      if (Random.get() < 0.5) {
+        this.attackShield();
+      } else {
+        this.attackSpear();
+      }
+      this.didAttack();
+    }
+  }
 
-    if (!isUnderAggro && this.hasLOS && this.attackDelay <= 0) {
-      this.attack() && this.didAttack();
+  private attackSpear() {
+    this.freeze(4);
+    this.playAnimation(SolAnimations.SpearSlow);
+    SoundCache.play(SPEAR_START);
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(this.firstSpear ? this.doFirstSpear.bind(this) : this.doSecondSpear.bind(this), 2),
+    );
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => SoundCache.play(SPEAR_END), 3),
+    );
+    this.firstSpear = !this.firstSpear;
+    this.firstShield = true;
+
+    this.attackDelay = 7;
+  }
+
+  private attackShield() {
+    this.freeze(4);
+    this.playAnimation(SolAnimations.Shield);
+    SoundCache.play(SHIELD_START);
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(this.firstShield ? this.doFirstShield.bind(this) : this.doSecondShield.bind(this), 2),
+    );
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => SoundCache.play(SHIELD_END), 3),
+    );
+    this.firstSpear = true;
+    this.firstShield = !this.firstShield;
+
+    this.attackDelay = 7;
+  }
+
+  private fillRect(fromX: number, fromY: number, toX: number, toY: number, exceptRadius = null) {
+    const midX = (toX - fromX + 1) / 2;
+    const midY = (toY - fromY + 1) / 2;
+    for (let xx = fromX; xx < toX; ++xx) {
+      for (let yy = toY; yy > fromY; --yy) {
+        const radX = Math.abs(midX - xx + fromX);
+        const radY = Math.abs(midY - yy + fromY);
+        if ((radX === exceptRadius && radY <= exceptRadius) || (radY === exceptRadius && radX <= exceptRadius)) {
+          continue;
+        }
+        this.region.addEntity(new SolGroundSlam(this.region, { x: xx, y: yy }, this, this.aggro));
+      }
+    }
+  }
+
+  // Bresenham's line algorirthm
+  private fillLine(fromX: number, fromY: number, direction: AttackDirection, length: number) {
+    const toX = fromX + DIRECTIONS[direction].dx * length;
+    const toY = fromY + DIRECTIONS[direction].dy * length;
+    const dx = Math.abs(toX - fromX);
+    const dy = Math.abs(toY - fromY);
+    const sx = Math.sign(toX - fromX);
+    const sy = Math.sign(toY - fromY);
+    let err = dx - dy;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      this.region.addEntity(new SolGroundSlam(this.region, { x: fromX, y: fromY }, this, this.aggro));
+      if (fromX === toX && fromY === toY) break;
+      const e2 = 2 * err;
+      if (e2 > -dy) {
+        err -= dy;
+        fromX += sx;
+      }
+      if (e2 < dx) {
+        err += dx;
+        fromY += sy;
+      }
+    }
+  }
+
+  private doFirstSpear() {
+    const LINE_LENGTH = 7;
+    // slam under boss
+    this.fillRect(this.location.x, this.location.y - this.size, this.location.x + this.size, this.location.y);
+    const direction = this.getAttackDirection();
+    // slam line facing player
+    switch (direction) {
+      case AttackDirection.West:
+        this.fillRect(this.location.x - 1, this.location.y - this.size, this.location.x, this.location.y);
+        this.fillLine(this.location.x - 2, this.location.y - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x - 2, this.location.y - 3, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.East:
+        this.fillRect(
+          this.location.x + this.size,
+          this.location.y - this.size,
+          this.location.x + this.size + 1,
+          this.location.y,
+        );
+        this.fillLine(this.location.x + this.size + 1, this.location.y - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size + 1, this.location.y - 3, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.North:
+        this.fillRect(
+          this.location.x,
+          this.location.y - this.size - 1,
+          this.location.x + this.size,
+          this.location.y - this.size,
+        );
+        this.fillLine(this.location.x + 1, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 3, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.South:
+        this.fillRect(this.location.x, this.location.y, this.location.x + this.size, this.location.y + 1);
+        this.fillLine(this.location.x + 1, this.location.y + 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 3, this.location.y + 2, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.NorthEast:
+        this.fillLine(this.location.x + this.size - 1, this.location.y - this.size, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size, this.location.y - this.size + 1, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.SouthEast:
+        this.fillLine(this.location.x + this.size, this.location.y, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size - 1, this.location.y + 1, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.SouthWest:
+        this.fillLine(this.location.x - 1, this.location.y, direction, LINE_LENGTH);
+        this.fillLine(this.location.x, this.location.y + 1, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.NorthWest:
+        this.fillLine(this.location.x - 1, this.location.y - this.size + 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x, this.location.y - this.size, direction, LINE_LENGTH);
+        break;
+    }
+  }
+
+  private doSecondSpear() {
+    const LINE_LENGTH = 7;
+    // slam under boss
+    this.fillRect(
+      this.location.x - 1,
+      this.location.y - this.size - 1,
+      this.location.x + this.size + 1,
+      this.location.y + 1,
+    );
+    const direction = this.getAttackDirection();
+    // slam line facing player
+    switch (direction) {
+      case AttackDirection.West:
+        this.fillRect(this.location.x - 1, this.location.y - this.size, this.location.x, this.location.y);
+        this.fillLine(this.location.x - 2, this.location.y, direction, LINE_LENGTH);
+        this.fillLine(this.location.x - 2, this.location.y - 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x - 2, this.location.y - 4, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.East:
+        this.fillRect(
+          this.location.x + this.size,
+          this.location.y - this.size,
+          this.location.x + this.size + 1,
+          this.location.y,
+        );
+        this.fillLine(this.location.x + this.size + 1, this.location.y, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size + 1, this.location.y - 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size + 1, this.location.y - 4, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.North:
+        this.fillRect(
+          this.location.x,
+          this.location.y - this.size - 1,
+          this.location.x + this.size,
+          this.location.y - this.size,
+        );
+        this.fillLine(this.location.x, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 2, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 4, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.South:
+        this.fillRect(this.location.x, this.location.y, this.location.x + this.size, this.location.y + 1);
+        this.fillLine(this.location.x, this.location.y + 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 2, this.location.y + 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 4, this.location.y + 2, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.NorthEast:
+        this.fillLine(this.location.x + this.size + 1, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size - 2, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size + 1, this.location.y - this.size + 2, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.SouthEast:
+        this.fillLine(this.location.x + this.size + 1, this.location.y - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size + 1, this.location.y + 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + this.size - 2, this.location.y + 2, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.SouthWest:
+        this.fillLine(this.location.x - 2, this.location.y + 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x - 2, this.location.y - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 1, this.location.y + 2, direction, LINE_LENGTH);
+        break;
+      case AttackDirection.NorthWest:
+        this.fillLine(this.location.x - 2, this.location.y - this.size + 2, direction, LINE_LENGTH);
+        this.fillLine(this.location.x - 2, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        this.fillLine(this.location.x + 1, this.location.y - this.size - 1, direction, LINE_LENGTH);
+        break;
+    }
+  }
+
+  private doFirstShield() {
+    this.fillRect(this.location.x - 8, this.location.y - 12, this.location.x + 11, this.location.y + 7, 4);
+  }
+
+  private doSecondShield() {
+    this.fillRect(this.location.x - 8, this.location.y - 12, this.location.x + 11, this.location.y + 7, 5);
+  }
+
+  private getAttackDirection() {
+    const [closestX, closestY] = this.getClosestTileTo(this.aggro.location.x, this.aggro.location.y);
+    const dx = this.aggro.location.x - closestX;
+    const dy = this.aggro.location.y - closestY;
+    if (dx < 0 && dy === 0) {
+      return AttackDirection.West;
+    } else if (dx < 0 && dy < 0) {
+      return AttackDirection.NorthWest;
+    } else if (dx === 0 && dy < 0) {
+      return AttackDirection.North;
+    } else if (dx > 0 && dy < 0) {
+      return AttackDirection.NorthEast;
+    } else if (dx > 0 && dy === 0) {
+      return AttackDirection.East;
+    } else if (dx > 0 && dy > 0) {
+      return AttackDirection.SouthEast;
+    } else if (dx === 0 && dy > 0) {
+      return AttackDirection.South;
+    } else {
+      return AttackDirection.SouthWest;
     }
   }
 
@@ -168,15 +419,24 @@ export class SolHeredit extends Mob {
   }
 
   override get idlePoseId() {
-    return 0;
+    return SolAnimations.Idle;
   }
 
   override get walkingPoseId() {
-    return 1;
+    return SolAnimations.Walk;
   }
 
   override get attackAnimationId() {
-    return 2;
+    // controlled separately
+    return null;
+  }
+
+  override get deathAnimationId() {
+    return SolAnimations.Death;
+  }
+
+  override get deathAnimationLength() {
+    return 8;
   }
 
   get maxSpeed() {
@@ -194,7 +454,9 @@ export class SolHeredit extends Mob {
       this.maxSpeed,
       Math.max(Math.abs(originLocation.x - tx) - 1, Math.abs(originLocation.y - ty) - 1),
     );
-    let dx = this.location.x + _.clamp(tx - originLocation.x, -maxSpeed, maxSpeed);
+    // if maxSpeed is zero, i.e. you are on the corners, allow it move horizontally
+    const maxSpeedX = Math.max(1, maxSpeed);
+    let dx = this.location.x + _.clamp(tx - originLocation.x, -maxSpeedX, maxSpeedX);
     let dy = this.location.y + _.clamp(ty - originLocation.y, -maxSpeed, maxSpeed);
 
     if (

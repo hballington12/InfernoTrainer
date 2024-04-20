@@ -435,7 +435,7 @@ export abstract class Unit extends Renderable {
   }
 
   // Returns the closest tile on this mob to the specified point.
-  getClosestTileTo(x: number, y: number) {
+  getClosestTileTo(x: number, y: number): [number, number] {
     // We simply clamp the target point to our own boundary box.
     return [
       clamp(x, this.location.x, this.location.x + this.size - 1),
