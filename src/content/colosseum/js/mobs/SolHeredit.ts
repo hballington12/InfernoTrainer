@@ -219,6 +219,9 @@ export class SolHeredit extends Mob {
   }
 
   private fillRect(fromX: number, fromY: number, toX: number, toY: number, exceptRadius = null) {
+    if (!this.aggro) {
+      return;
+    }
     const midX = (toX - fromX + 1) / 2;
     const midY = (toY - fromY + 1) / 2;
     for (let xx = fromX; xx < toX; ++xx) {
@@ -235,6 +238,9 @@ export class SolHeredit extends Mob {
 
   // Bresenham's line algorirthm
   private fillLine(fromX: number, fromY: number, direction: AttackDirection, length: number) {
+    if (!this.aggro) {
+      return;
+    }
     const toX = fromX + DIRECTIONS[direction].dx * length;
     const toY = fromY + DIRECTIONS[direction].dy * length;
     const dx = Math.abs(toX - fromX);
