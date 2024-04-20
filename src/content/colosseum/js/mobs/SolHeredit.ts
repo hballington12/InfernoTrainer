@@ -167,11 +167,11 @@ export class SolHeredit extends Mob {
     return GLTFModel.forRenderable(this, SolHereditModel, 0.02);
   }
 
-  get idlePoseId() {
+  override get idlePoseId() {
     return 0;
   }
 
-  get walkingPoseId() {
+  override get walkingPoseId() {
     return 1;
   }
 
