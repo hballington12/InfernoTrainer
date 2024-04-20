@@ -66,6 +66,8 @@ export class SolHeredit extends Mob {
   private firstSpear = true;
   private firstShield = true;
 
+  lastLocation = { ...this.location };
+
   stationaryTimer = 0;
 
   mobName(): EntityName {
@@ -199,9 +201,7 @@ export class SolHeredit extends Mob {
     DelayedAction.registerDelayedAction(
       new DelayedAction(this.firstSpear ? this.doFirstSpear.bind(this) : this.doSecondSpear.bind(this), 2),
     );
-    DelayedAction.registerDelayedAction(
-      new DelayedAction(() => SoundCache.play(SPEAR_END), 3),
-    );
+    DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(SPEAR_END), 3));
     this.firstSpear = !this.firstSpear;
     this.firstShield = true;
 
@@ -215,9 +215,7 @@ export class SolHeredit extends Mob {
     DelayedAction.registerDelayedAction(
       new DelayedAction(this.firstShield ? this.doFirstShield.bind(this) : this.doSecondShield.bind(this), 2),
     );
-    DelayedAction.registerDelayedAction(
-      new DelayedAction(() => SoundCache.play(SHIELD_END), 3),
-    );
+    DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(SHIELD_END), 3));
     this.firstSpear = true;
     this.firstShield = !this.firstShield;
 
@@ -422,6 +420,7 @@ export class SolHeredit extends Mob {
     } else if (dx === 0 && dy > 0) {
       return AttackDirection.South;
     } else {
+      // technically also if dx = 0 and dy = 0, i.e. you're under the boss
       return AttackDirection.SouthWest;
     }
   }
@@ -453,6 +452,16 @@ export class SolHeredit extends Mob {
 
   get maxSpeed() {
     return 2;
+  }
+
+  override movementStep() {
+    super.movementStep();
+    if (this.lastLocation.x === this.location.x && this.lastLocation.y === this.location.y) {
+      ++this.stationaryTimer;
+    } else {
+      this.stationaryTimer = 0;
+    }
+    this.lastLocation = { ...this.location };
   }
 
   override getNextMovementStep() {
@@ -497,11 +506,6 @@ export class SolHeredit extends Mob {
           dy = this.location.y - 1;
         }
       }
-    }
-    if (dx === this.location.x && dy === this.location.y) {
-      this.stationaryTimer++;
-    } else {
-      this.stationaryTimer = 0;
     }
     return { dx, dy };
   }
