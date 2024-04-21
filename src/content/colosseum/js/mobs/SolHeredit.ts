@@ -231,6 +231,7 @@ export class SolHeredit extends Mob {
     }
     const midX = (toX - fromX + 1) / 2;
     const midY = (toY - fromY + 1) / 2;
+    const radius = Math.abs(fromX - toX);
     for (let xx = fromX; xx < toX; ++xx) {
       for (let yy = toY; yy > fromY; --yy) {
         const radX = Math.abs(midX - xx + fromX);
@@ -238,7 +239,9 @@ export class SolHeredit extends Mob {
         if ((radX === exceptRadius && radY <= exceptRadius) || (radY === exceptRadius && radX <= exceptRadius)) {
           continue;
         }
-        this.region.addEntity(new SolGroundSlam(this.region, { x: xx, y: yy }, this, this.aggro));
+        this.region.addEntity(
+          new SolGroundSlam(this.region, { x: xx, y: yy }, this, this.aggro, Math.max(radX, radY) / radius),
+        );
       }
     }
   }
@@ -255,9 +258,10 @@ export class SolHeredit extends Mob {
     const sx = Math.sign(toX - fromX);
     const sy = Math.sign(toY - fromY);
     let err = dx - dy;
+    let n = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      this.region.addEntity(new SolGroundSlam(this.region, { x: fromX, y: fromY }, this, this.aggro));
+      this.region.addEntity(new SolGroundSlam(this.region, { x: fromX, y: fromY }, this, this.aggro, n++ / length));
       if (fromX === toX && fromY === toY) break;
       const e2 = 2 * err;
       if (e2 > -dy) {
@@ -346,29 +350,16 @@ export class SolHeredit extends Mob {
         this.fillLine(this.location.x - 2, this.location.y - 4, direction, LINE_LENGTH);
         break;
       case AttackDirection.East:
-        this.fillRect(
-          this.location.x + this.size,
-          this.location.y - this.size,
-          this.location.x + this.size + 1,
-          this.location.y,
-        );
         this.fillLine(this.location.x + this.size + 1, this.location.y, direction, LINE_LENGTH);
         this.fillLine(this.location.x + this.size + 1, this.location.y - 2, direction, LINE_LENGTH);
         this.fillLine(this.location.x + this.size + 1, this.location.y - 4, direction, LINE_LENGTH);
         break;
       case AttackDirection.North:
-        this.fillRect(
-          this.location.x,
-          this.location.y - this.size - 1,
-          this.location.x + this.size,
-          this.location.y - this.size,
-        );
         this.fillLine(this.location.x, this.location.y - this.size - 1, direction, LINE_LENGTH);
         this.fillLine(this.location.x + 2, this.location.y - this.size - 1, direction, LINE_LENGTH);
         this.fillLine(this.location.x + 4, this.location.y - this.size - 1, direction, LINE_LENGTH);
         break;
       case AttackDirection.South:
-        this.fillRect(this.location.x, this.location.y, this.location.x + this.size, this.location.y + 1);
         this.fillLine(this.location.x, this.location.y + 2, direction, LINE_LENGTH);
         this.fillLine(this.location.x + 2, this.location.y + 2, direction, LINE_LENGTH);
         this.fillLine(this.location.x + 4, this.location.y + 2, direction, LINE_LENGTH);

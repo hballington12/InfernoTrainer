@@ -36,7 +36,13 @@ export class SolGroundSlam extends Entity {
 
   age = 0;
 
-  constructor(region: Region, location: Location, from: Unit, to: Unit) {
+  constructor(
+    region: Region,
+    location: Location,
+    from: Unit,
+    to: Unit,
+    private delay: number | null = 0,
+  ) {
     super(region, location);
     this.from = from;
     this.to = to;
@@ -66,8 +72,9 @@ export class SolGroundSlam extends Entity {
     return false;
   }
 
-  visible() {
-    return this.age >= 1;
+  visible(tickPercent) {
+    // makes the sparks appear to shoot forward
+    return this.age + tickPercent >= 1 + this.delay / 3;
   }
 
   tick() {
