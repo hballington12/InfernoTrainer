@@ -66,6 +66,7 @@ export class SolHeredit extends Mob {
   // public for testing
   firstSpear = true;
   firstShield = true;
+  forceAttack: 'spear' | 'shield' | null = null;
 
   lastLocation = { ...this.location };
 
@@ -96,7 +97,7 @@ export class SolHeredit extends Mob {
   }
 
   setStats() {
-    this.stunned = 1;
+    this.stunned = 4;
     this.weapons = {
       stab: new MeleeWeapon(),
     };
@@ -193,9 +194,11 @@ export class SolHeredit extends Mob {
     }
 
     if (this.hasLOS && this.attackDelay <= 0 && this.stationaryTimer > 0) {
-      const nextDelay = (Random.get() < 0.5) ? this.attackShield() : this.attackSpear();
+      const shouldShield = (this.forceAttack !== 'spear' && Random.get() < 0.5) || this.forceAttack === 'shield';
+      const nextDelay = (shouldShield) ? this.attackShield() : this.attackSpear();
       this.didAttack();
       this.attackDelay = nextDelay;
+      this.forceAttack = null;
     }
   }
 

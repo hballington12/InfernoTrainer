@@ -23,6 +23,7 @@ import { InfernalCape } from "../../equipment/InfernalCape";
 import { TorvaPlatebody } from "../../equipment/TorvaPlatebody";
 import { TorvaPlatelegs } from "../../equipment/TorvaPlatelegs";
 import { PrimordialBoots } from "../../equipment/PrimordialBoots";
+import { FourTickDummyWeapon } from "../../weapons/FourTickDummyWeapon";
 
 export class ColosseumLoadout {
   loadoutType: string;
@@ -54,7 +55,7 @@ export class ColosseumLoadout {
         new NecklaceOfAnguish(),
         new MasoriChapsF(),
         new MasoriMaskF(),
-        new SaradominBrew(),
+        new FourTickDummyWeapon(),
         new SaradominBrew(),
         new SaradominBrew(),
         new SuperRestore(),
