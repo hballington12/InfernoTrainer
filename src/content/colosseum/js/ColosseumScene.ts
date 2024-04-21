@@ -7,6 +7,7 @@ import { LineOfSightMask } from "../../../sdk/LineOfSight";
 import { GLTFModel } from "../../../sdk/rendering/GLTFModel";
 import { Assets } from "../../../sdk/utils/Assets";
 
+const SceneModel = Assets.getAssetUrl("models/colosseum_partial.glb");
 export class ColosseumScene extends Entity {
   get collisionType() {
     return CollisionType.NONE;
@@ -14,6 +15,10 @@ export class ColosseumScene extends Entity {
 
   get size() {
     return 1;
+  }
+
+  get drawOutline() {
+    return false;
   }
 
   draw() {
@@ -34,7 +39,7 @@ export class ColosseumScene extends Entity {
 
   create3dModel(): Model {
     // one day we'll figure out the offsets used in the exporter...
-    return new GLTFModel(this, [Assets.getAssetUrl("models/colosseum.glb")], 1, -11.2, {
+    return new GLTFModel(this, [SceneModel], 1, -11.2, {
       x: -6.5,
       y: 12.5,
     });

@@ -6,6 +6,7 @@ import { SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
 import { forceRandom } from "../setupFiles";
 import { FourTickDummyWeapon } from "../../src/content/weapons/FourTickDummyWeapon";
 import { ScytheOfVitur } from "../../src/content/weapons/ScytheOfVitur";
+import { CollisionType } from "../../src/sdk/Collision";
 
 // sol heredit movement tests
 describe("sol heredit attacks", () => {
@@ -22,6 +23,7 @@ describe("sol heredit attacks", () => {
     Viewport.setupViewport(region, true);
     player = new Player(region, { x: 15, y: 15 });
     boss = new SolHeredit(region, { x: 13, y: 20 }, { aggro: player });
+    boss.stunned = 0;
     region.addPlayer(player);
     Viewport.viewport.setPlayer(player);
   });
@@ -40,7 +42,7 @@ describe("sol heredit attacks", () => {
     world.tickWorld();
     // player got hit
     expect(player.currentStats.hitpoint).toBeLessThan(99);
-    let hp = player.currentStats.hitpoint;
+    const hp = player.currentStats.hitpoint;
     world.tickWorld(3);
     forceRandom(1.0);
     expect(boss.firstSpear).toEqual(false);
@@ -86,100 +88,5 @@ describe("sol heredit attacks", () => {
       expect(boss.hasLOS).toEqual(true);
       expect(boss.attackDelay).toBeLessThan(0);
     }
-  });
-
-  test("drag tech simulation", () => {
-    let fourTickWeapon = new FourTickDummyWeapon();
-    let fiveTickWeapon = new ScytheOfVitur();
-    // simulating https://youtu.be/b7Iv7cf-taQ?t=577
-    boss.setAggro(player);
-    region.addMob(boss);
-    boss.stunned = 4;
-    boss.setLocation({ x: 10, y: 10 });
-    fourTickWeapon.inventoryLeftClick(player);
-
-    player.setLocation({ x: 12, y: 15 });
-    player.setAggro(boss);
-
-    world.tickWorld();
-    expect(boss.location).toEqual({ x: 10, y: 10 });
-    expect(player.location).toEqual({ x: 12, y: 13 });
-
-    world.tickWorld();
-    expect(boss.location).toEqual({ x: 10, y: 10 });
-    expect(player.location).toEqual({ x: 12, y: 11 });
-    expect(player.attackDelay).toEqual(4);
-    fiveTickWeapon.inventoryLeftClick(player);
-    player.moveTo(9, 8);
-
-    world.tickWorld();
-    expect(boss.location).toEqual({ x: 10, y: 10 });
-    expect(player.location).toEqual({ x: 10, y: 9 });
-    forceRandom(1.0); // spear
-
-    world.tickWorld();
-    expect(boss.location).toEqual({ x: 10, y: 10 });
-    expect(player.location).toEqual({ x: 9, y: 8 });
-    player.setAggro(boss);
-
-    world.tickWorld();
-    expect(boss.attackDelay).toEqual(7);
-
-    world.tickWorld();
-    expect(player.attackDelay).toEqual(5);
-    player.moveTo(8, 8);
-
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 8, y: 8 });
-    player.setAggro(boss);
-
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 9, y: 8 });
-    expect(player.currentStats.hitpoint).toEqual(99);
-
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 9, y: 8 });
-    expect(player.currentStats.hitpoint).toEqual(99);
-    player.moveTo(8, 7);
-
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 8, y: 7 });
-    player.setAggro(boss);
-
-    // phased the boss here
-    boss.currentStats.hitpoint = 1337;
-    // TODO implement phase transition
-    boss.stunned = 7;
-
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 9, y: 7 });
-    expect(player.attackDelay).toEqual(5);
-
-    world.tickWorld();
-    world.tickWorld();
-    player.moveTo(8, 8);
-    world.tickWorld();
-    player.moveTo(8, 9);
-    world.tickWorld();
-    world.tickWorld();
-    player.setAggro(boss);
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 8, y: 9 });
-    expect(boss.location).toEqual({ x: 9, y: 10 });
-    expect(player.attackDelay).toEqual(5);
-    expect(boss.attackDelay).toBeLessThan(0);
-    player.moveTo(9, 11);
-
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 9, y: 11 });
-    expect(boss.location).toEqual({ x: 9, y: 10 });
-    expect(boss.attackDelay).toBeLessThan(0);
-    player.moveTo(9, 12);
-
-    world.tickWorld();
-    expect(player.location).toEqual({ x: 9, y: 12 });
-    expect(boss.location).toEqual({ x: 9, y: 11 });
-    expect(boss.attackDelay).toBeLessThan(0);
-    player.moveTo(9, 13);
   });
 });

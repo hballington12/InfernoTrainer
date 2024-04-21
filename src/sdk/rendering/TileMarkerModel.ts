@@ -5,13 +5,13 @@ import { Location } from "../Location";
 import { drawLineOnTop } from "./RenderUtils";
 
 export class TileMarkerModel implements Model {
-  static forRenderable(r: Renderable) {
-    return new TileMarkerModel(r);
+  static forRenderable(r: Renderable, onTop = true) {
+    return new TileMarkerModel(r, onTop);
   }
 
   private outline: THREE.LineSegments;
 
-  constructor(private renderable: Renderable) {
+  constructor(private renderable: Renderable, onTop = true) {
     const { size } = renderable;
     const lineMaterial = new THREE.LineBasicMaterial({
       color: renderable.colorHex,
@@ -29,7 +29,9 @@ export class TileMarkerModel implements Model {
     ];
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     this.outline = new THREE.LineSegments(geometry, lineMaterial);
-    drawLineOnTop(this.outline);
+    if (onTop) {
+      drawLineOnTop(this.outline);
+    }
   }
 
   draw(scene: THREE.Scene, clockDelta: number, tickPercent: number, location: Location) {

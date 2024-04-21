@@ -19,6 +19,7 @@ describe("sol heredit movement", () => {
     Viewport.setupViewport(region, true);
     player = new Player(region, { x: 15, y: 15 });
     boss = new SolHeredit(region, { x: 13, y: 23 }, { aggro: player });
+    boss.stunned = 0;
     region.addPlayer(player);
     Viewport.viewport.setPlayer(player);
   });

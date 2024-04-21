@@ -13,6 +13,8 @@ import { ColosseumScene } from "./ColosseumScene";
 import { SolHeredit as SolHeredit } from "./mobs/SolHeredit";
 
 import SidebarContent from "../sidebar.html";
+import { InvisibleMovementBlocker } from "../../MovementBlocker";
+import { WallMan } from "./entities/WallMan";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -106,6 +108,25 @@ export class ColosseumRegion extends Region {
     const loadout = new ColosseumLoadout("max_melee");
     loadout.setStats(player);
     player.setUnitOptions(loadout.getLoadout());
+
+    // NE 34,18
+    // NW 19,18
+    // SE 34,33
+    // SW 19,33
+
+    for (let xx = 19; xx <= 34; ++xx) {
+      this.addEntity(new WallMan(this, {x: xx, y: 18}));
+      this.addEntity(new WallMan(this, {x: xx, y: 33}));
+    }
+
+    for (let yy = 18; yy <= 33; ++yy) {
+      this.addEntity(new WallMan(this, {x: 19, y: yy}));
+      this.addEntity(new WallMan(this, {x: 34, y: yy}));
+    }
+    this.addEntity(new WallMan(this, {x: 33, y: 19}));
+    this.addEntity(new WallMan(this, {x: 20, y: 19}));
+    this.addEntity(new WallMan(this, {x: 33, y: 32}));
+    this.addEntity(new WallMan(this, {x: 20, y: 32}));
 
     this.addMob(new SolHeredit(this, { x: 25, y: 27 }, { aggro: player }));
 

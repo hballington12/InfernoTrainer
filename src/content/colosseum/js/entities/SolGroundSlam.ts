@@ -43,7 +43,7 @@ export class SolGroundSlam extends Entity {
   }
 
   create3dModel() {
-    return TileMarkerModel.forRenderable(this);
+    return TileMarkerModel.forRenderable(this, false);
   }
 
   get color() {

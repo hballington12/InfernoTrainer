@@ -83,11 +83,20 @@ export class SolHeredit extends Mob {
     return 1200;
   }
 
+  get healthScale() {
+    return this.stats.hitpoint;
+  }
+
+  visible() {
+    return true;
+  }
+
   dead() {
     super.dead();
   }
 
   setStats() {
+    this.stunned = 1;
     this.weapons = {
       stab: new MeleeWeapon(),
     };
@@ -184,12 +193,9 @@ export class SolHeredit extends Mob {
     }
 
     if (this.hasLOS && this.attackDelay <= 0 && this.stationaryTimer > 0) {
-      if (Random.get() < 0.5) {
-        this.attackShield();
-      } else {
-        this.attackSpear();
-      }
+      const nextDelay = (Random.get() < 0.5) ? this.attackShield() : this.attackSpear();
       this.didAttack();
+      this.attackDelay = nextDelay;
     }
   }
 
@@ -203,8 +209,7 @@ export class SolHeredit extends Mob {
     DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(SPEAR_END), 3));
     this.firstSpear = !this.firstSpear;
     this.firstShield = true;
-
-    this.attackDelay = 7;
+    return 7;
   }
 
   private attackShield() {
@@ -217,8 +222,7 @@ export class SolHeredit extends Mob {
     DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(SHIELD_END), 3));
     this.firstSpear = true;
     this.firstShield = !this.firstShield;
-
-    this.attackDelay = 6;
+    return 6;
   }
 
   private fillRect(fromX: number, fromY: number, toX: number, toY: number, exceptRadius = null) {
