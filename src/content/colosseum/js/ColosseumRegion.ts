@@ -10,7 +10,7 @@ import { ImageLoader } from "../../../sdk/utils/ImageLoader";
 import { Viewport } from "../../../sdk/Viewport";
 import { ColosseumLoadout } from "./ColosseumLoadout";
 import { ColosseumScene } from "./ColosseumScene";
-import { SolHeredit as SolHeredit } from "./mobs/SolHeredit";
+import { Attacks, SolHeredit as SolHeredit } from "./mobs/SolHeredit";
 
 import SidebarContent from "../sidebar.html";
 import { InvisibleMovementBlocker } from "../../MovementBlocker";
@@ -115,18 +115,18 @@ export class ColosseumRegion extends Region {
     // SW 19,33
 
     for (let xx = 19; xx <= 34; ++xx) {
-      this.addEntity(new WallMan(this, {x: xx, y: 18}));
-      this.addEntity(new WallMan(this, {x: xx, y: 33}));
+      this.addEntity(new WallMan(this, { x: xx, y: 18 }));
+      this.addEntity(new WallMan(this, { x: xx, y: 33 }));
     }
 
     for (let yy = 18; yy <= 33; ++yy) {
-      this.addEntity(new WallMan(this, {x: 19, y: yy}));
-      this.addEntity(new WallMan(this, {x: 34, y: yy}));
+      this.addEntity(new WallMan(this, { x: 19, y: yy }));
+      this.addEntity(new WallMan(this, { x: 34, y: yy }));
     }
-    this.addEntity(new WallMan(this, {x: 33, y: 19}));
-    this.addEntity(new WallMan(this, {x: 20, y: 19}));
-    this.addEntity(new WallMan(this, {x: 33, y: 32}));
-    this.addEntity(new WallMan(this, {x: 20, y: 32}));
+    this.addEntity(new WallMan(this, { x: 33, y: 19 }));
+    this.addEntity(new WallMan(this, { x: 20, y: 19 }));
+    this.addEntity(new WallMan(this, { x: 33, y: 32 }));
+    this.addEntity(new WallMan(this, { x: 20, y: 32 }));
 
     this.addMob(new SolHeredit(this, { x: 25, y: 24 }, { aggro: player }));
 
@@ -154,76 +154,75 @@ export class ColosseumRegion extends Region {
         boss.stunned = 4;
         player.inventory.find((i) => i.itemName === "Shark")?.inventoryLeftClick(player);
         player.setAggro(boss);
-      break;
+        break;
       case 3:
         player.inventory.find((i) => i.itemName === "Scythe of Vitur")?.inventoryLeftClick(player);
         player.moveTo(24, 22);
-      break;
+        break;
       case 5:
-        boss.forceAttack = "spear";
+        boss.forceAttack = Attacks.SPEAR;
         player.setAggro(boss);
-      break;
+        break;
       case 7:
         player.moveTo(23, 22);
-      break;
+        break;
       case 8:
         player.setAggro(boss);
-      break;
+        break;
       case 9:
         player.moveTo(24, 21);
-      break;
+        break;
       case 10:
         player.setAggro(boss);
-      break;
+        break;
       case 12:
         boss.currentStats.hitpoint = 1337;
         boss.stunned = 6; // TODO phase
-      break;
+        break;
       case 14:
         player.moveTo(23, 22);
-      break;
+        break;
       case 15:
         player.moveTo(23, 23);
-      break;
+        break;
       case 16:
         player.setAggro(boss);
-      break;
+        break;
       case 17:
         player.moveTo(24, 25);
-      break;
+        break;
       case 18:
         player.moveTo(24, 26);
-      break;
+        break;
       case 19:
         player.moveTo(24, 27);
-      break;
+        break;
       case 20:
         player.moveTo(24, 28);
-      break;
+        break;
       case 21:
         player.setAggro(boss);
-      break;
+        break;
       case 23:
         player.moveTo(25, 29);
-      break;
+        break;
       case 25:
         player.setAggro(boss);
-      break;
+        break;
       case 28:
         player.moveTo(26, 29);
-      break;
+        break;
       case 29:
         player.moveTo(26, 30);
-      break;
+        break;
       case 30:
         player.setAggro(boss);
-      break;
+        break;
       case 31:
-        boss.forceAttack = 'shield';
-      break;
+        boss.forceAttack = Attacks.SHIELD;
+        break;
     }
     ++this.replayTick;
-
   }
 
   getSidebarContent() {

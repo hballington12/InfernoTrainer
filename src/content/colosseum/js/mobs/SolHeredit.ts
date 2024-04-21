@@ -22,6 +22,11 @@ import SpearStart from "../../assets/sounds/8147_spear.ogg";
 import SpearEnd from "../../assets/sounds/8047_spear_swing.ogg";
 import ShieldStart from "../../assets/sounds/8150_shield_start.ogg";
 import ShieldEnd from "../../assets/sounds/8145_shield_stomp.ogg";
+import TripleStart from "../../assets/sounds/8211_triple_charge.ogg";
+import TripleCharge1 from "../../assets/sounds/8317_triple_charge_1.ogg";
+import TripleCharge2 from "../../assets/sounds/8274_triple_charge_2.ogg";
+import TripleCharge3Short from "../../assets/sounds/8218_triple_charge_3_short.ogg";
+import TripleCharge3Long from "../../assets/sounds/8113_triple_charge_3_long.ogg";
 
 enum SolAnimations {
   Idle = 0,
@@ -30,8 +35,8 @@ enum SolAnimations {
   SpearSlow = 3,
   Grapple = 4,
   Shield = 5,
-  TripleAttack = 6,
-  TripleAttackFast = 7,
+  TripleAttackLong = 6,
+  TripleAttackShort = 7,
   Death = 8,
 }
 
@@ -61,12 +66,25 @@ const SPEAR_START = new Sound(SpearStart, 0.1);
 const SPEAR_END = new Sound(SpearEnd, 0.1);
 const SHIELD_START = new Sound(ShieldStart, 0.1);
 const SHIELD_END = new Sound(ShieldEnd, 0.1);
+const TRIPLE_START = new Sound(TripleStart, 0.1);
+const TRIPLE_CHARGE_1 = new Sound(TripleCharge1, 0.1);
+const TRIPLE_CHARGE_2 = new Sound(TripleCharge2, 0.1);
+const TRIPLE_CHARGE_3_SHORT = new Sound(TripleCharge3Short, 0.1);
+const TRIPLE_CHARGE_3_LONG = new Sound(TripleCharge3Long, 0.1);
+
+export enum Attacks {
+  SPEAR = "spear",
+  SHIELD = "shield",
+  TRIPLE_SLOW = "triple_slow",
+  TRIPLE_FAST = "triple_fast",
+}
+
 export class SolHeredit extends Mob {
   shouldRespawnMobs: boolean;
   // public for testing
   firstSpear = true;
   firstShield = true;
-  forceAttack: 'spear' | 'shield' | null = null;
+  forceAttack: Attacks | null = null;
 
   lastLocation = { ...this.location };
 
@@ -194,11 +212,30 @@ export class SolHeredit extends Mob {
     }
 
     if (this.hasLOS && this.attackDelay <= 0 && this.stationaryTimer > 0) {
-      const shouldShield = (this.forceAttack !== 'spear' && Random.get() < 0.5) || this.forceAttack === 'shield';
-      const nextDelay = (shouldShield) ? this.attackShield() : this.attackSpear();
+      const nextAttack = this.selectAttack();
+      let nextDelay = 0;
+      switch (nextAttack) {
+        case Attacks.SHIELD:
+          nextDelay = this.attackShield();
+          break;
+        case Attacks.SPEAR:
+          nextDelay = this.attackSpear();
+          break;
+      }
       this.didAttack();
       this.attackDelay = nextDelay;
       this.forceAttack = null;
+    }
+  }
+
+  private selectAttack() {
+    if (this.forceAttack) {
+      return this.forceAttack;
+    }
+    if (Random.get() < 0.5) {
+      return Attacks.SHIELD;
+    } else {
+      return Attacks.SPEAR;
     }
   }
 

@@ -2,11 +2,9 @@ import { Player } from "../../src/sdk/Player";
 import { World } from "../../src/sdk/World";
 import { Viewport } from "../../src/sdk/Viewport";
 import { TestRegion } from "../utils/TestRegion";
-import { SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
-import { forceRandom } from "../setupFiles";
+import { Attacks, SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
 import { FourTickDummyWeapon } from "../../src/content/weapons/FourTickDummyWeapon";
 import { ScytheOfVitur } from "../../src/content/weapons/ScytheOfVitur";
-import { CollisionType } from "../../src/sdk/Collision";
 
 // sol heredit 32-tick reproduction of kiwi iskadda's fight in https://www.youtube.com/watch?v=b7Iv7cf-taQ
 describe("sol heredit attacks", () => {
@@ -43,7 +41,7 @@ describe("sol heredit attacks", () => {
     expect(player.location).toEqual({ x: 27, y: 29 });
     player.setAggro(boss);
   });
-  
+
   test("tick 2", () => {
     world.tickWorld();
     expect(boss.location).toEqual({ x: 25, y: 24 });
@@ -70,7 +68,7 @@ describe("sol heredit attacks", () => {
     expect(boss.location).toEqual({ x: 25, y: 24 });
     expect(player.location).toEqual({ x: 24, y: 22 });
     player.setAggro(boss);
-    boss.forceAttack = 'spear';
+    boss.forceAttack = Attacks.SPEAR;
   });
 
   test("tick 6", () => {
@@ -202,7 +200,7 @@ describe("sol heredit attacks", () => {
   });
 
   test("tick 23", () => {
-    boss.forceAttack = 'spear';
+    boss.forceAttack = Attacks.SPEAR;
     world.tickWorld();
     expect(player.location).toEqual({ x: 24, y: 28 });
     expect(boss.location).toEqual({ x: 24, y: 27 });
@@ -230,7 +228,6 @@ describe("sol heredit attacks", () => {
     expect(boss.location).toEqual({ x: 24, y: 27 });
     expect(player.stats.hitpoint).toEqual(99);
   });
-  
 
   test("tick 27", () => {
     world.tickWorld();
@@ -238,7 +235,6 @@ describe("sol heredit attacks", () => {
     expect(boss.location).toEqual({ x: 24, y: 27 });
     expect(player.attackDelay).toEqual(5);
   });
-  
 
   test("tick 28", () => {
     world.tickWorld();
@@ -246,7 +242,6 @@ describe("sol heredit attacks", () => {
     expect(boss.location).toEqual({ x: 24, y: 27 });
     player.moveTo(26, 29);
   });
-  
 
   test("tick 29", () => {
     world.tickWorld();
@@ -254,7 +249,6 @@ describe("sol heredit attacks", () => {
     expect(boss.location).toEqual({ x: 24, y: 27 });
     player.moveTo(26, 30);
   });
-  
 
   test("tick 30", () => {
     world.tickWorld();
@@ -270,7 +264,7 @@ describe("sol heredit attacks", () => {
   });
 
   test("tick 32", () => {
-    boss.forceAttack = 'shield';
+    boss.forceAttack = Attacks.SHIELD;
     world.tickWorld();
     expect(player.location).toEqual({ x: 26, y: 30 });
     expect(boss.location).toEqual({ x: 24, y: 29 });

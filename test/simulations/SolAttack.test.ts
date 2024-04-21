@@ -2,8 +2,7 @@ import { Player } from "../../src/sdk/Player";
 import { World } from "../../src/sdk/World";
 import { Viewport } from "../../src/sdk/Viewport";
 import { TestRegion } from "../utils/TestRegion";
-import { SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
-import { forceRandom } from "../setupFiles";
+import { Attacks, SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
 import { FourTickDummyWeapon } from "../../src/content/weapons/FourTickDummyWeapon";
 import { ScytheOfVitur } from "../../src/content/weapons/ScytheOfVitur";
 import { CollisionType } from "../../src/sdk/Collision";
@@ -33,8 +32,7 @@ describe("sol heredit attacks", () => {
     boss.setAggro(player);
     region.addMob(boss);
 
-    // < 0.5 shield, else spear
-    forceRandom(1.0);
+    boss.forceAttack = Attacks.SPEAR;
     world.tickWorld();
     expect(boss.firstSpear).toEqual(false);
     world.tickWorld(2);
@@ -44,7 +42,7 @@ describe("sol heredit attacks", () => {
     expect(player.currentStats.hitpoint).toBeLessThan(99);
     const hp = player.currentStats.hitpoint;
     world.tickWorld(3);
-    forceRandom(1.0);
+    boss.forceAttack = Attacks.SPEAR;
     expect(boss.firstSpear).toEqual(false);
     world.tickWorld();
     expect(boss.firstSpear).toEqual(true);
