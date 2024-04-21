@@ -63,8 +63,9 @@ const SHIELD_START = new Sound(ShieldStart, 0.1);
 const SHIELD_END = new Sound(ShieldEnd, 0.1);
 export class SolHeredit extends Mob {
   shouldRespawnMobs: boolean;
-  private firstSpear = true;
-  private firstShield = true;
+  // public for testing
+  firstSpear = true;
+  firstShield = true;
 
   lastLocation = { ...this.location };
 
@@ -87,8 +88,6 @@ export class SolHeredit extends Mob {
   }
 
   setStats() {
-    this.stunned = 1;
-
     this.weapons = {
       stab: new MeleeWeapon(),
     };
