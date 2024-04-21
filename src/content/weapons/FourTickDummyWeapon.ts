@@ -54,7 +54,7 @@ export class FourTickDummyWeapon extends MeleeWeapon {
   }
 
   get itemName(): ItemName {
-    return ItemName.SCYTHE_OF_VITUR;
+    return ItemName.SHARK;
   }
 
   get isTwoHander(): boolean {

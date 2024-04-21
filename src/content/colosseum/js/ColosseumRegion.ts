@@ -100,7 +100,7 @@ export class ColosseumRegion extends Region {
     // create player
     const player = new Player(this, {
       x: 27,
-      y: 30,
+      y: 29,
     });
 
     this.addPlayer(player);
@@ -128,7 +128,7 @@ export class ColosseumRegion extends Region {
     this.addEntity(new WallMan(this, {x: 33, y: 32}));
     this.addEntity(new WallMan(this, {x: 20, y: 32}));
 
-    this.addMob(new SolHeredit(this, { x: 25, y: 27 }, { aggro: player }));
+    this.addMob(new SolHeredit(this, { x: 25, y: 24 }, { aggro: player }));
 
     // Add 3d scene
     if (Settings.use3dView) {
@@ -138,6 +138,92 @@ export class ColosseumRegion extends Region {
     return {
       player: player,
     };
+  }
+
+  private enableReplay = false;
+  private replayTick = 1;
+  override postTick() {
+    if (!this.enableReplay || this.world.getReadyTimer > 0) {
+      return;
+    }
+    // replay mode for debug only
+    const player = this.players[0];
+    const boss = this.mobs[0] as SolHeredit;
+    switch (this.replayTick) {
+      case 1:
+        boss.stunned = 4;
+        player.inventory.find((i) => i.itemName === "Shark")?.inventoryLeftClick(player);
+        player.setAggro(boss);
+      break;
+      case 3:
+        player.inventory.find((i) => i.itemName === "Scythe of Vitur")?.inventoryLeftClick(player);
+        player.moveTo(24, 22);
+      break;
+      case 5:
+        boss.forceAttack = "spear";
+        player.setAggro(boss);
+      break;
+      case 7:
+        player.moveTo(23, 22);
+      break;
+      case 8:
+        player.setAggro(boss);
+      break;
+      case 9:
+        player.moveTo(24, 21);
+      break;
+      case 10:
+        player.setAggro(boss);
+      break;
+      case 12:
+        boss.currentStats.hitpoint = 1337;
+        boss.stunned = 6; // TODO phase
+      break;
+      case 14:
+        player.moveTo(23, 22);
+      break;
+      case 15:
+        player.moveTo(23, 23);
+      break;
+      case 16:
+        player.setAggro(boss);
+      break;
+      case 17:
+        player.moveTo(24, 25);
+      break;
+      case 18:
+        player.moveTo(24, 26);
+      break;
+      case 19:
+        player.moveTo(24, 27);
+      break;
+      case 20:
+        player.moveTo(24, 28);
+      break;
+      case 21:
+        player.setAggro(boss);
+      break;
+      case 23:
+        player.moveTo(25, 29);
+      break;
+      case 25:
+        player.setAggro(boss);
+      break;
+      case 28:
+        player.moveTo(26, 29);
+      break;
+      case 29:
+        player.moveTo(26, 30);
+      break;
+      case 30:
+        player.setAggro(boss);
+      break;
+      case 31:
+        boss.forceAttack = 'shield';
+      break;
+    }
+    ++this.replayTick;
+
   }
 
   getSidebarContent() {
