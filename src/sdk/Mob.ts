@@ -15,6 +15,7 @@ import { Region } from "./Region";
 import { CanvasSpriteModel } from "./rendering/CanvasSpriteModel";
 import { Model } from "./rendering/Model";
 import { InputController } from "./Input";
+import { parseText } from "./utils/Text";
 
 export enum AttackIndicators {
   NONE = 0,
@@ -522,6 +523,7 @@ export class Mob extends Unit {
       context.fillRect(location.x * scale, location.y * scale, scale, scale);
     });*/
   }
+
   override drawUILayer(tickPercent, offset, context, scale, hitsplatsAbove) {
     context.save();
     context.translate(offset.x, offset.y);
@@ -530,6 +532,7 @@ export class Mob extends Unit {
     }
 
     this.drawHPBar(context, scale);
+    this.drawOverheadText(context, scale);
     this.drawHitsplats(context, scale, hitsplatsAbove);
     this.drawOverheadPrayers(context, scale);
 

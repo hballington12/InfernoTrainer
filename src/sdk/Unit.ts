@@ -31,6 +31,7 @@ import { CollisionType } from "./Collision";
 import { Renderable } from "./Renderable";
 import { Sound, SoundCache } from "./utils/SoundCache";
 import { DelayedAction } from "./DelayedAction";
+import { parseText } from "./utils/Text";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum UnitTypes {
@@ -124,6 +125,9 @@ export abstract class Unit extends Renderable {
   lastRotation = 0;
   hasDiedAndAwaitingRemoval = false;
   nulledTicks = 0;
+  
+  overheadText: string | null = null;
+  overheadTextTimer = 0;
 
   get deathAnimationLength(): number {
     return 3;
@@ -235,6 +239,11 @@ export abstract class Unit extends Renderable {
     this.nulledTicks--;
     this.attackDelay--;
     this.lastRotation = this.getPerceivedRotation(0);
+
+    if (this.overheadTextTimer <= 0) {
+      this.overheadText = null;
+    }
+    this.overheadTextTimer--;
   }
 
   // called when the unit has attacked
@@ -658,6 +667,28 @@ export abstract class Unit extends Renderable {
 
   damageTaken() {
     // Override me
+  }
+  
+  setOverheadText(text: string) {
+    this.overheadText = text;
+    this.overheadTextTimer = 8;
+  }
+
+  drawOverheadText(context: OffscreenCanvasRenderingContext2D, scale: number) {
+    if (!this.overheadText) {
+      return;
+    }
+    context.font = "24px OSRS";
+    context.fillStyle = "yellow";
+    const parsedText = parseText(this.overheadText);
+    const fullWidth = context.measureText(parsedText.map(({text}) => text).join(""));
+    let startX = -(fullWidth.width / 2);
+    for (let i = 0; i < parsedText.length; i++) {
+      const { text, color } = parsedText[i];
+      context.fillStyle = color ? `#${color}` : "yellow";
+      context.fillText(text, startX, -this.height * scale);
+      startX += context.measureText(text).width;
+    }
   }
 
   override draw(tickPercent, context, offset, scale, drawUnderTile) {

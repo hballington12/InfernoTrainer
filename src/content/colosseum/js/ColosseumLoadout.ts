@@ -68,14 +68,6 @@ export class ColosseumLoadout {
         new SaradominBrew(),
         new SuperRestore(),
         new SuperRestore(),
-        new SaradominBrew(),
-        new SaradominBrew(),
-        new SuperRestore(),
-        new SuperRestore(),
-        new BastionPotion(),
-        new StaminaPotion(),
-        new SuperRestore(),
-        new SuperRestore(),
       ],
     };
   }
