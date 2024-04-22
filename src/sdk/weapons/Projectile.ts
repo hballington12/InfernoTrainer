@@ -27,6 +27,8 @@ export interface MultiModelProjectileOffsetInterpolator {
 export interface ProjectileOptions {
   forceSWTile?: boolean;
   hidden?: boolean;
+  // if true, check prayer on landing rather than attack time
+  checkPrayerAtHit?: boolean;
   // overrides reduceDelay
   setDelay?: number;
   reduceDelay?: number;
@@ -56,7 +58,6 @@ export interface ProjectileOptions {
 
 const targetIsLocation = (x: Unit | Location): x is Location => (x as Location).x !== undefined;
 export class Projectile extends Renderable {
-  weapon: Weapon;
   damage: number;
   from: Unit;
   to: Unit | Location3;
@@ -83,7 +84,7 @@ export class Projectile extends Renderable {
     This should take the player and mob object, and do chebyshev on the size of them
   */
   constructor(
-    weapon: Weapon,
+    private weapon: Weapon | null,
     damage: number,
     from: Unit,
     to: Unit | Location3,
@@ -97,6 +98,7 @@ export class Projectile extends Renderable {
       this.damage = to.currentStats.hitpoint;
     }
     this.options = {
+      checkPrayerAtHit: false,
       modelScale: 1.0,
       verticalOffset: 0.0,
       visualDelayTicks: 0,
@@ -113,10 +115,10 @@ export class Projectile extends Renderable {
     this.to = to;
     this.distance = 999999;
 
-    if (Weapon.isMeleeAttackStyle(attackStyle)) {
+    if (!weapon || Weapon.isMeleeAttackStyle(attackStyle)) {
       this.distance = 0;
       this.remainingDelay = 1;
-    } else {
+    } else if (weapon) {
       if (weapon.image) {
         this.image = weapon.image;
       }
@@ -124,10 +126,7 @@ export class Projectile extends Renderable {
       if (options.forceSWTile) {
         // Things like ice barrage calculate distance to SW tile only
         const targetSW = targetIsLocation(to) ? to : to.location;
-        this.distance = chebyshev(
-          [this.from.location.x, this.from.location.y],
-          [targetSW.x, targetSW.y],
-        );
+        this.distance = chebyshev([this.from.location.x, this.from.location.y], [targetSW.x, targetSW.y]);
       } else if (targetIsLocation(to)) {
         const closestTile = to;
         const closestTileFrom = from.getClosestTileTo(to.x, to.y);
@@ -197,7 +196,7 @@ export class Projectile extends Renderable {
     const x = toX + (targetSize - 1) / 2;
     const y = toY - (targetSize - 1) / 2;
 
-    return { x, y, z: endHeight }
+    return { x, y, z: endHeight };
   }
 
   getPerceivedRotation(tickPercent) {
@@ -256,25 +255,21 @@ export class Projectile extends Renderable {
   onTick() {
     const targetLocation = this.getTargetDestination(0.0);
     this.currentLocation = {
-      x: Pathing.linearInterpolation(
-        this.currentLocation.x,
-        targetLocation.x,
-        1 / (this.remainingDelay + 1),
-      ),
-      y: Pathing.linearInterpolation(
-        this.currentLocation.y,
-        targetLocation.y,
-        1 / (this.remainingDelay + 1),
-      ),
+      x: Pathing.linearInterpolation(this.currentLocation.x, targetLocation.x, 1 / (this.remainingDelay + 1)),
+      y: Pathing.linearInterpolation(this.currentLocation.y, targetLocation.y, 1 / (this.remainingDelay + 1)),
     };
     this.remainingDelay--;
     this.age++;
     this.checkSound(this.options.projectileSound, this.options.visualDelayTicks);
   }
 
-  onHit() {
+  // called as the projectile lands but before damage is calculated
+  beforeHit() {
     if (this.options.hitSound) {
       SoundCache.play(this.options.hitSound);
+    }
+    if (!targetIsLocation(this.to) && this.options.checkPrayerAtHit && this.weapon?.isBlockable(this.from, this.to, { attackStyle: this.attackStyle })) {
+      this.damage = 0;
     }
   }
 
@@ -337,12 +332,7 @@ export class Projectile extends Renderable {
       return null;
     }
     if (this.options.models) {
-      return GLTFModel.forRenderableMulti(
-        this,
-        this.options.models,
-        this.options.modelScale,
-        0,
-      );
+      return GLTFModel.forRenderableMulti(this, this.options.models, this.options.modelScale, 0);
     }
     if (this.options.model) {
       return GLTFModel.forRenderable(this, this.options.model, this.options.modelScale, 0);
@@ -400,10 +390,8 @@ export class ArcProjectileMotionInterpolator implements ProjectileMotionInterpol
   }
 }
 
-
 // Simply sticks to the target
 export class FollowTargetInterpolator implements ProjectileMotionInterpolator {
-
   interpolate(from: Location3, to: Location3, percent: number) {
     const endX = to.x;
     const endY = to.y;

@@ -23,7 +23,7 @@ class SolGroundSlamWeapon extends Weapon {
 
   attack(from: Unit, to: Unit, bonuses: AttackBonuses = {}, options: ProjectileOptions = {}): boolean {
     // up to 45? not sure what min hit is
-    this.damage = 1; // TODO 20 + Math.floor(Random.get() * 25);
+    this.damage = 20 + Math.floor(Random.get() * 25);
     to.addProjectile(new Projectile(this, this.damage, from, to, bonuses.attackStyle, options));
     return true;
   }

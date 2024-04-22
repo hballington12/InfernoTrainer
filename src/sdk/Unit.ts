@@ -608,7 +608,8 @@ export abstract class Unit extends Renderable {
       projectile.onTick();
 
       if (projectile.remainingDelay === 0) {
-        projectile.onHit();
+        // may override damage etc
+        projectile.beforeHit();
         // Some attacks can be nullified if they land after the attackers death.
         if (
           projectile.options &&

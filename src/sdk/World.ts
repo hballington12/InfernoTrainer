@@ -149,7 +149,7 @@ export class World {
       projectile.onTick();
 
       if (projectile.remainingDelay === 0) {
-        projectile.onHit();
+        projectile.beforeHit();
       }
     });
 

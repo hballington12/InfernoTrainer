@@ -15,6 +15,7 @@ import { Attacks, SolHeredit as SolHeredit } from "./mobs/SolHeredit";
 import SidebarContent from "../sidebar.html";
 import { InvisibleMovementBlocker } from "../../MovementBlocker";
 import { WallMan } from "./entities/WallMan";
+import { ColosseumSettings } from "./ColosseumSettings";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -134,6 +135,22 @@ export class ColosseumRegion extends Region {
     if (Settings.use3dView) {
       this.addEntity(new ColosseumScene(this, { x: 0, y: 48 }));
     }
+
+    // setup UI and settings
+    ColosseumSettings.readFromStorage();
+    
+    const setupAttackConfig = (elementId: string, field: keyof typeof ColosseumSettings) => {
+      const checkbox = document.getElementById(elementId) as HTMLInputElement;
+      checkbox.checked = ColosseumSettings[field] as boolean;
+      checkbox.addEventListener("change", () => {
+        (ColosseumSettings[field] as boolean) = checkbox.checked;
+        ColosseumSettings.persistToStorage();
+      });
+    };
+    setupAttackConfig("use_shield", "useShields");
+    setupAttackConfig("use_spears", "useSpears");
+    setupAttackConfig("use_triple_short", "useTripleShort");
+    setupAttackConfig("use_triple_long", "useTripleLong");
 
     return {
       player: player,

@@ -27,6 +27,11 @@ import TripleCharge1 from "../../assets/sounds/8317_triple_charge_1.ogg";
 import TripleCharge2 from "../../assets/sounds/8274_triple_charge_2.ogg";
 import TripleCharge3Short from "../../assets/sounds/8218_triple_charge_3_short.ogg";
 import TripleCharge3Long from "../../assets/sounds/8113_triple_charge_3_long.ogg";
+import TripleParry1 from "../../assets/sounds/8140_triple_parry_1.ogg";
+import TripleParry2 from "../../assets/sounds/8171_triple_parry_2.ogg";
+import TripleParry3 from "../../assets/sounds/8242_triple_parry_3.ogg";
+import { RingBuffer } from "../utils/RingBuffer";
+import { ColosseumSettings } from "../ColosseumSettings";
 
 enum SolAnimations {
   Idle = 0,
@@ -72,11 +77,22 @@ const TRIPLE_CHARGE_2 = new Sound(TripleCharge2, 0.1);
 const TRIPLE_CHARGE_3_SHORT = new Sound(TripleCharge3Short, 0.1);
 const TRIPLE_CHARGE_3_LONG = new Sound(TripleCharge3Long, 0.1);
 
+const TRIPLE_PARRY_1 = new Sound(TripleParry1, 0.1);
+const TRIPLE_PARRY_2 = new Sound(TripleParry2, 0.1);
+const TRIPLE_PARRY_3 = new Sound(TripleParry3, 0.1);
+
 export enum Attacks {
   SPEAR = "spear",
   SHIELD = "shield",
-  TRIPLE_SLOW = "triple_slow",
-  TRIPLE_FAST = "triple_fast",
+  TRIPLE_LONG = "triple_long",
+  TRIPLE_SHORT = "triple_short",
+}
+
+// used when the player messed up the parry
+class ParryUnblockableWeapon extends MeleeWeapon {
+  override isBlockable() {
+    return false;
+  }
 }
 
 export class SolHeredit extends Mob {
@@ -87,6 +103,9 @@ export class SolHeredit extends Mob {
   forceAttack: Attacks | null = null;
 
   lastLocation = { ...this.location };
+
+  // melee prayer overhead history of target
+  overheadHistory: RingBuffer = new RingBuffer(5)
 
   stationaryTimer = 0;
 
@@ -192,6 +211,7 @@ export class SolHeredit extends Mob {
   }
 
   attackIfPossible() {
+    this.overheadHistory.push(this.aggro?.prayerController.overhead()?.name === "Protect from Melee");
     this.attackStyle = this.attackStyleForNewAttack();
 
     this.attackFeedback = AttackIndicators.NONE;
@@ -221,6 +241,12 @@ export class SolHeredit extends Mob {
         case Attacks.SPEAR:
           nextDelay = this.attackSpear();
           break;
+        case Attacks.TRIPLE_SHORT:
+          nextDelay = this.attackTripleShort();
+          break;
+        case Attacks.TRIPLE_LONG:
+          nextDelay = this.attackTripleLong();
+          break;
       }
       this.didAttack();
       this.attackDelay = nextDelay;
@@ -232,15 +258,20 @@ export class SolHeredit extends Mob {
     if (this.forceAttack) {
       return this.forceAttack;
     }
-    if (Random.get() < 0.5) {
-      return Attacks.SHIELD;
-    } else {
-      return Attacks.SPEAR;
+    const attackPool = [
+      ...(ColosseumSettings.useShields && [Attacks.SHIELD]),
+      ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
+      ...(ColosseumSettings.useTripleLong && [Attacks.TRIPLE_LONG]),
+      ...(ColosseumSettings.useTripleShort && [Attacks.TRIPLE_SHORT]),
+    ];
+    if (attackPool.length === 0) {
+      return null;
     }
+    return attackPool[Math.floor(Random.get() * attackPool.length)];
   }
 
   private attackSpear() {
-    this.freeze(4);
+    this.freeze(6);
     this.playAnimation(SolAnimations.SpearSlow);
     SoundCache.play(SPEAR_START);
     DelayedAction.registerDelayedAction(
@@ -433,6 +464,75 @@ export class SolHeredit extends Mob {
 
   private doSecondShield() {
     this.fillRect(this.location.x - 8, this.location.y - 12, this.location.x + 11, this.location.y + 7, 5);
+  }
+
+  private attackTripleShort() {
+    // used above 50%
+    this.playAnimation(SolAnimations.TripleAttackShort);
+    this._attackTriple(true);
+    return 12; // should be 11 between 50% and 75%
+  }
+
+  private attackTripleLong() {
+    // used below 50%
+    this.playAnimation(SolAnimations.TripleAttackLong);
+    this._attackTriple(false);
+    return 12;
+  }
+
+  private _attackTriple(short: boolean) {
+    SoundCache.play(TRIPLE_START);
+    SoundCache.play(TRIPLE_CHARGE_1);
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(this.doParryAttack(15, 3).bind(this), 2),
+    );
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => {
+        SoundCache.play(TRIPLE_PARRY_1);
+      }, 3),
+    );
+    DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(TRIPLE_CHARGE_2), 4));
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(this.doParryAttack(short ? 25 : 30, 2).bind(this), 5),
+    );
+    DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(TRIPLE_PARRY_2), 6));
+    if (short) {
+      DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(TRIPLE_CHARGE_3_SHORT), 6));
+      DelayedAction.registerDelayedAction(
+        new DelayedAction(this.doParryAttack(35, 2).bind(this), 8),
+      );
+      DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(TRIPLE_PARRY_3), 9));
+    } else {
+      DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(TRIPLE_CHARGE_3_LONG), 6));
+      DelayedAction.registerDelayedAction(
+        new DelayedAction(this.doParryAttack(45, 3).bind(this), 9),
+      );
+      DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(TRIPLE_PARRY_3), 10));
+    }
+  }
+
+  private wasOverheadOn(ticks: number) {
+    for (let i = 0; i < ticks; ++i) {
+      if (this.overheadHistory.pop()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private doParryAttack = (damage: number, ticks: number) => () => {
+      const overheadWasOn = this.wasOverheadOn(ticks);
+      this.aggro.addProjectile(
+        new Projectile(
+          overheadWasOn ? new ParryUnblockableWeapon() : new MeleeWeapon(),
+          damage,
+          this,
+          this.aggro,
+          "stab",
+          { hidden: true, setDelay: 1, checkPrayerAtHit: !overheadWasOn },
+        ),
+      );
+      this.overheadHistory.clear();
   }
 
   private getAttackDirection() {
