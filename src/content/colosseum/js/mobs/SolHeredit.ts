@@ -489,24 +489,26 @@ export class SolHeredit extends Mob {
   }
 
   private attackTripleShort() {
+    this.firstShield = true;
+    this.firstSpear = true;
     // used above 50%
     this.playAnimation(SolAnimations.TripleAttackShort);
     this._attackTriple(true);
-    this.firstShield = true;
-    this.firstSpear = true;
     return 12; // should be 11 between 50% and 75%
   }
 
   private attackTripleLong() {
+    this.firstShield = true;
+    this.firstSpear = true;
     // used below 50%
     this.playAnimation(SolAnimations.TripleAttackLong);
     this._attackTriple(false);
-    this.firstShield = true;
-    this.firstSpear = true;
     return 12;
   }
 
   private attackGrapple() {
+    this.firstShield = true;
+    this.firstSpear = true;
     this.playAnimation(SolAnimations.Grapple);
     SoundCache.play(GRAPPLE_CHARGE);
     const slotIdx = Math.floor(Random.get() * Object.keys(GRAPPLE_SLOTS).length);
@@ -515,9 +517,12 @@ export class SolHeredit extends Mob {
     this.setOverheadText(overheadText);
 
     let didParry = false;
+    let wrongParry = false;
     EquipmentControls?.instance.addEquipmentInteraction((clickedSlot) => {
-      if (clickedSlot === slot) {
+      if (!wrongParry && clickedSlot === slot) {
         didParry = true;
+      } else {
+        wrongParry = true;
       }
     });
     DelayedAction.registerDelayedNpcAction(
