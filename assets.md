@@ -133,6 +133,12 @@ Using Dezinator's `osrscachereader` at https://github.com/Dezinater/osrscacherea
     npm run cmd modelBuilder spotanim 660 name tekton_meteor
     npm run cmd modelBuilder spotanim 659 name tekton_meteor_splat
 
+
+    2689-2692 / laser thin
+    2693-2696 - laser wide
+    2697 - spark thing?
+    asset 2698 - laser pool thing
+
 sounds
 range and mage ATTACK  sound 598
 death 598

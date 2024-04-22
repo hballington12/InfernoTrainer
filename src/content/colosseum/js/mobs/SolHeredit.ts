@@ -1,6 +1,7 @@
 "use strict";
 
-import { MagicWeapon } from "../../../../sdk/weapons/MagicWeapon";
+import _ from "lodash";
+
 import { MeleeWeapon } from "../../../../sdk/weapons/MeleeWeapon";
 import { Mob, AttackIndicators } from "../../../../sdk/Mob";
 import { UnitBonuses } from "../../../../sdk/Unit";
@@ -8,11 +9,11 @@ import { Collision } from "../../../../sdk/Collision";
 import { EntityName } from "../../../../sdk/EntityName";
 import { Projectile } from "../../../../sdk/weapons/Projectile";
 import { Sound, SoundCache } from "../../../../sdk/utils/SoundCache";
+import { Location } from "../../../../sdk/Location";
 
 import { GLTFModel } from "../../../../sdk/rendering/GLTFModel";
 import { Assets } from "../../../../sdk/utils/Assets";
 import { Random } from "../../../../sdk/Random";
-import _ from "lodash";
 import { DelayedAction } from "../../../../sdk/DelayedAction";
 import { SolGroundSlam } from "../entities/SolGroundSlam";
 
@@ -32,6 +33,7 @@ import TripleParry2 from "../../assets/sounds/8171_triple_parry_2.ogg";
 import TripleParry3 from "../../assets/sounds/8242_triple_parry_3.ogg";
 import { RingBuffer } from "../utils/RingBuffer";
 import { ColosseumSettings } from "../ColosseumSettings";
+import { Pathing } from "../../../../sdk/Pathing";
 
 enum SolAnimations {
   Idle = 0,
@@ -609,15 +611,52 @@ export class SolHeredit extends Mob {
     const { x: tx, y: ty } = this.aggro.location;
     const closestTile = this.getClosestTileTo(tx, ty);
     const originLocation = { x: closestTile[0], y: closestTile[1] };
-    const maxSpeed = Math.min(
-      this.maxSpeed,
-      Math.max(Math.abs(originLocation.x - tx) - 1, Math.abs(originLocation.y - ty) - 1),
-    );
-    // if maxSpeed is zero, i.e. you are on the corners, allow it move horizontally
-    const maxSpeedX = Math.max(1, maxSpeed);
-    let dx = this.location.x + _.clamp(tx - originLocation.x, -maxSpeedX, maxSpeedX);
-    let dy = this.location.y + _.clamp(ty - originLocation.y, -maxSpeed, maxSpeed);
+    const seekingTiles: Location[] = [];
+    const aggroSize = this.aggro.size;
+    _.range(0, aggroSize).forEach((xx) => {
+      [-1, this.aggro.size].forEach((yy) => {
+        // Don't path into an unpathable object.
+        const px = this.aggro.location.x + xx;
+        const py = this.aggro.location.y - yy;
+        if (!Collision.collidesWithAnyEntities(this.region, px, py, 1)) {
+          seekingTiles.push({
+            x: px,
+            y: py,
+          });
+        }
+      });
+    });
+    _.range(0, aggroSize).forEach((yy) => {
+      [-1, this.aggro.size].forEach((xx) => {
+        // Don't path into an unpathable object.
+        const px = this.aggro.location.x + xx;
+        const py = this.aggro.location.y - yy;
+        if (!Collision.collidesWithAnyEntities(this.region, px, py, 1)) {
+          seekingTiles.push({
+            x: px,
+            y: py,
+          });
+        }
+      });
+    });
+    // Create paths to all npc tiles
+    const { destination, path } = Pathing.constructPaths(this.region, originLocation, seekingTiles);
+    if (path.length === 0) {
+      return;
+    }
+    let diffX = 0, diffY = 0;
+    if (path.length <= this.maxSpeed) {
+      // Step to the destination
+      diffX = path[0].x - originLocation.x;
+      diffY = path[0].y - originLocation.y;
+    } else {
+      // Move two steps forward
+      diffX = path[path.length - this.maxSpeed - 1].x - originLocation.x;
+      diffY = path[path.length - this.maxSpeed - 1].y - originLocation.y;
+    }
 
+    let dx = this.location.x + diffX;
+    let dy = this.location.y + diffY;
     if (
       Collision.collisionMath(
         this.location.x,

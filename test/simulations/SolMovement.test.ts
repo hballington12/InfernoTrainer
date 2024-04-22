@@ -47,11 +47,28 @@ describe("sol heredit movement", () => {
     expect(boss.location).toEqual({ x: 12, y: 20 });
   });
 
-  test("sol moves diagonally when player is at corner", () => {
-    player.setLocation({ x: 0, y: 0 });
-    player.moveTo(0, 0);
+  // diagonal movement order tests
+  test("sol moves straight before moving diagonally", () => {
+    boss.setLocation({x: 4, y: 12})
+    player.setLocation({ x: 0, y: 20 });
+    player.moveTo(0, 20);
     world.tickWorld();
-    expect(player.location).toEqual({ x: 0, y: 0 });
-    expect(boss.location).toEqual({ x: 10, y: 18 });
+    expect(player.location).toEqual({ x: 0, y: 20 });
+    expect(boss.location).toEqual({ x: 4, y: 14 });
+  });
+  
+  test("sol moves in an L movement", () => {
+    world.tickWorld();
+    expect(boss.location).toEqual({ x: 3, y: 16 });
+  });
+  
+  test("sol takes a diagonal step", () => {
+    world.tickWorld();
+    expect(boss.location).toEqual({ x: 1, y: 18 });
+  });
+  
+  test("sol ends up north of the player", () => {
+    world.tickWorld();
+    expect(boss.location).toEqual({ x: 0, y: 19 });
   });
 });
