@@ -686,7 +686,7 @@ export abstract class Unit extends Renderable {
     for (let i = 0; i < parsedText.length; i++) {
       const { text, color } = parsedText[i];
       context.fillStyle = color ? `#${color}` : "yellow";
-      context.fillText(text, startX, -(this.size / 2 + 10) * scale);
+      context.fillText(text, startX, (-(this.size / 2) * scale) - 10);
       startX += context.measureText(text).width;
     }
   }
