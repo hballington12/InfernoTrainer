@@ -470,6 +470,8 @@ export class SolHeredit extends Mob {
     // used above 50%
     this.playAnimation(SolAnimations.TripleAttackShort);
     this._attackTriple(true);
+    this.firstShield = true;
+    this.firstSpear = true;
     return 12; // should be 11 between 50% and 75%
   }
 
@@ -477,6 +479,8 @@ export class SolHeredit extends Mob {
     // used below 50%
     this.playAnimation(SolAnimations.TripleAttackLong);
     this._attackTriple(false);
+    this.firstShield = true;
+    this.firstSpear = true;
     return 12;
   }
 
