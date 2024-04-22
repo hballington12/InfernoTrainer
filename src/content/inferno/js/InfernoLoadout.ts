@@ -467,7 +467,7 @@ export class InfernoLoadout {
         break;
     }
 
-    if (this.wave > 66) {
+    if (this.wave > 66 && this.wave <= 69) {
       // switch necklace to range dps necklace
       loadout.inventory[this.findItemByName(loadout.inventory, ItemName.NECKLACE_OF_ANGUISH)] = new OccultNecklace();
       loadout.equipment.necklace = new NecklaceOfAnguish();
