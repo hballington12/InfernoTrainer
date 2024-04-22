@@ -517,12 +517,9 @@ export class SolHeredit extends Mob {
     this.setOverheadText(overheadText);
 
     let didParry = false;
-    let wrongParry = false;
     EquipmentControls?.instance.addEquipmentInteraction((clickedSlot) => {
       if (!wrongParry && clickedSlot === slot) {
         didParry = true;
-      } else {
-        wrongParry = true;
       }
     });
     DelayedAction.registerDelayedNpcAction(
