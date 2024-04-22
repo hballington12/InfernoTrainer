@@ -229,7 +229,7 @@ export class SolHeredit extends Mob {
   }
 
   attackIfPossible() {
-    this.overheadHistory.push(this.aggro?.prayerController.overhead()?.name === "Protect from Melee");
+    this.overheadHistory.push(!!this.aggro?.prayerController.overhead());
     this.attackStyle = this.attackStyleForNewAttack();
 
     this.attackFeedback = AttackIndicators.NONE;
@@ -586,7 +586,7 @@ export class SolHeredit extends Mob {
 
   private doParryAttack = (damage: number, ticks: number) => () => {
       const overheadWasOn = this.wasOverheadOn(ticks);
-      this.aggro.addProjectile(
+      this.aggro?.addProjectile(
         new Projectile(
           overheadWasOn ? new ParryUnblockableWeapon() : new MeleeWeapon(),
           damage,
@@ -596,6 +596,9 @@ export class SolHeredit extends Mob {
           { hidden: true, setDelay: 1, checkPrayerAtHit: !overheadWasOn },
         ),
       );
+      this.aggro?.prayerController.findPrayerByName("Protect from Melee").deactivate();
+      this.aggro?.prayerController.findPrayerByName("Protect from Range").deactivate();
+      this.aggro?.prayerController.findPrayerByName("Protect from Magic").deactivate();
       this.overheadHistory.clear();
   }
 
