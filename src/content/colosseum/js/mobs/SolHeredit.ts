@@ -518,7 +518,7 @@ export class SolHeredit extends Mob {
 
     let didParry = false;
     EquipmentControls?.instance.addEquipmentInteraction((clickedSlot) => {
-      if (!wrongParry && clickedSlot === slot) {
+      if (clickedSlot === slot) {
         didParry = true;
       }
     });
