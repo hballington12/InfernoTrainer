@@ -1,6 +1,6 @@
 {
-  "name": "OldSchoolSDK",
-  "version": "1.0.0",
+  "name": "@supalosa/oldschool-trainer-sdk",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
