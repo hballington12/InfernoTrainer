@@ -13,7 +13,6 @@ import { ColosseumScene } from "./ColosseumScene";
 import { Attacks, SolHeredit as SolHeredit } from "./mobs/SolHeredit";
 
 import SidebarContent from "../sidebar.html";
-import { InvisibleMovementBlocker } from "../../MovementBlocker";
 import { WallMan } from "./entities/WallMan";
 import { ColosseumSettings } from "./ColosseumSettings";
 
@@ -151,6 +150,7 @@ export class ColosseumRegion extends Region {
     setupAttackConfig("use_spears", "useSpears");
     setupAttackConfig("use_triple_short", "useTripleShort");
     setupAttackConfig("use_triple_long", "useTripleLong");
+    setupAttackConfig("use_grapple", "useGrapple");
 
     return {
       player: player,

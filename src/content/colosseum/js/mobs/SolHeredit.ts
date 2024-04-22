@@ -16,6 +16,9 @@ import { Assets } from "../../../../sdk/utils/Assets";
 import { Random } from "../../../../sdk/Random";
 import { DelayedAction } from "../../../../sdk/DelayedAction";
 import { SolGroundSlam } from "../entities/SolGroundSlam";
+import { RingBuffer } from "../utils/RingBuffer";
+import { ColosseumSettings } from "../ColosseumSettings";
+import { Pathing } from "../../../../sdk/Pathing";
 
 export const SolHereditModel = Assets.getAssetUrl("models/sol.glb");
 
@@ -31,9 +34,10 @@ import TripleCharge3Long from "../../assets/sounds/8113_triple_charge_3_long.ogg
 import TripleParry1 from "../../assets/sounds/8140_triple_parry_1.ogg";
 import TripleParry2 from "../../assets/sounds/8171_triple_parry_2.ogg";
 import TripleParry3 from "../../assets/sounds/8242_triple_parry_3.ogg";
-import { RingBuffer } from "../utils/RingBuffer";
-import { ColosseumSettings } from "../ColosseumSettings";
-import { Pathing } from "../../../../sdk/Pathing";
+import GrappleCharge from "../../assets/sounds/8329_grapple_charge.ogg";
+import GrappleParry from "../../assets/sounds/8081_grapple_parry.ogg";
+import { EquipmentControls } from "../../../../sdk/controlpanels/EquipmentControls";
+import { EquipmentTypes } from "../../../../sdk/Equipment";
 
 enum SolAnimations {
   Idle = 0,
@@ -83,11 +87,23 @@ const TRIPLE_PARRY_1 = new Sound(TripleParry1, 0.1);
 const TRIPLE_PARRY_2 = new Sound(TripleParry2, 0.1);
 const TRIPLE_PARRY_3 = new Sound(TripleParry3, 0.1);
 
+const GRAPPLE_CHARGE = new Sound(GrappleCharge, 0.1);
+const GRAPPLE_PARRY = new Sound(GrappleParry, 0.1);
+
 export enum Attacks {
   SPEAR = "spear",
   SHIELD = "shield",
   TRIPLE_LONG = "triple_long",
   TRIPLE_SHORT = "triple_short",
+  GRAPPLE = "grapple",
+}
+
+const GRAPPLE_SLOTS: {[slot in EquipmentTypes]?: string} = {
+  [EquipmentTypes.CHEST]: "<col=ff0000>I'LL CRUSH YOUR </color><col=ffffff>BODY</color><col=ff0000>!</color>",
+  [EquipmentTypes.BACK]: "<col=ff0000>I'LL BREAK YOUR </color><col=ffffff>BACK</color><col=ff0000>!</color>",
+  [EquipmentTypes.GLOVES]: "<col=ff0000>I'LL TWIST YOUR </color><col=ffffff>HANDS</color><col=ff0000> OFF!</color>",
+  [EquipmentTypes.LEGS]: "<col=ff0000>I'LL BREAK YOUR </color><col=ffffff>LEGS</color><col=ff0000>!</color>",
+  [EquipmentTypes.FEET]: "<col=ff0000>I'LL CUT YOUR </color><col=ffffff>FEET</color><col=ff0000> OFF!</color>",
 }
 
 // used when the player messed up the parry
@@ -249,6 +265,9 @@ export class SolHeredit extends Mob {
         case Attacks.TRIPLE_LONG:
           nextDelay = this.attackTripleLong();
           break;
+        case Attacks.GRAPPLE:
+          nextDelay = this.attackGrapple();
+          break;
       }
       this.didAttack();
       this.attackDelay = nextDelay;
@@ -265,6 +284,7 @@ export class SolHeredit extends Mob {
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useTripleLong && [Attacks.TRIPLE_LONG]),
       ...(ColosseumSettings.useTripleShort && [Attacks.TRIPLE_SHORT]),
+      ...(ColosseumSettings.useGrapple && [Attacks.GRAPPLE]),
     ];
     if (attackPool.length === 0) {
       return null;
@@ -484,6 +504,42 @@ export class SolHeredit extends Mob {
     this.firstShield = true;
     this.firstSpear = true;
     return 12;
+  }
+
+  private attackGrapple() {
+    this.playAnimation(SolAnimations.Grapple);
+    SoundCache.play(GRAPPLE_CHARGE);
+    const slotIdx = Math.floor(Random.get() * Object.keys(GRAPPLE_SLOTS).length);
+    const slot = Object.keys(GRAPPLE_SLOTS)[slotIdx];
+    const overheadText = GRAPPLE_SLOTS[slot];
+    this.setOverheadText(overheadText);
+
+    let didParry = false;
+    EquipmentControls?.instance.addEquipmentInteraction((clickedSlot) => {
+      if (clickedSlot === slot) {
+        didParry = true;
+      }
+    });
+    DelayedAction.registerDelayedNpcAction(
+      new DelayedAction(() => {
+        if (didParry) {
+          SoundCache.play(GRAPPLE_PARRY);
+        }
+        // queue damage to be played this tick (remember NPCs take turn before enemy)
+        this.aggro.addProjectile(
+          new Projectile(
+            new ParryUnblockableWeapon(),
+            didParry ? 0 : 20 + Math.floor(Random.get() * 25),
+            this,
+            this.aggro,
+            "stab",
+            { hidden: true, setDelay: 0 },
+          ),
+        );
+        EquipmentControls?.instance.resetEquipmentInteractions();
+      }, 3),
+    );
+    return 8; // should be 7 under 75%
   }
 
   private _attackTriple(short: boolean) {

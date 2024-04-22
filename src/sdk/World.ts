@@ -141,6 +141,8 @@ export class World {
       region.newMobs.forEach((mob) => mob.attackStep());
     }
 
+    DelayedAction.afterNpcTick();
+
     region.projectiles = filter(
       region.projectiles,
       (projectile: Projectile) => !projectile.shouldDestroy(),

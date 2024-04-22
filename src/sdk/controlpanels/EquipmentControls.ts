@@ -10,6 +10,13 @@ import { EQUIPMENT_TYPE_TO_SLOT, EquipmentTypes } from "../Equipment";
 import { InputController } from "../Input";
 
 export class EquipmentControls extends BaseControls {
+  static instance: EquipmentControls | null = null;
+
+  constructor() {
+    super();
+    EquipmentControls.instance = this;
+  }
+
   usedSpotBackground: HTMLImageElement = ImageLoader.createImage(UsedSpotBackground);
 
   private DEFAULT_EQUIPMENT_INTERACTIONS = [(slot) => this.unequipItem(slot)];
