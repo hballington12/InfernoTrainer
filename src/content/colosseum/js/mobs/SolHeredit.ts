@@ -678,8 +678,6 @@ export class SolHeredit extends Mob {
   };
 
   private phaseTransition(toPhase: number) {
-    this.firstShield = true;
-    this.firstSpear = true;
     this.freeze(5);
     const lastAggro = this.aggro;
     const { x, y } = this.aggro.location;
