@@ -318,6 +318,7 @@ export class SolHeredit extends Mob {
     const inRange = this.hasLOS || this.forceAttack === Attacks.PHASE_TRANSITION;
     if (inRange && this.attackDelay <= 0 && this.stationaryTimer > 0) {
       const nextAttack = this.selectAttack();
+      this.forceAttack = null;
       let nextDelay = 0;
       switch (nextAttack) {
         case Attacks.SHIELD:
@@ -348,7 +349,6 @@ export class SolHeredit extends Mob {
       }
       this.didAttack();
       this.attackDelay = nextDelay;
-      this.forceAttack = null;
     }
   }
 
