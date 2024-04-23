@@ -41,6 +41,8 @@ import PoolSpawn from "../../assets/sounds/8053_pool_spawn.ogg";
 import PoolShriek from "../../assets/sounds/8093_pool_shriek.ogg";
 import { SolSandPool } from "../entities/SolSandPool";
 import { ColosseumRegion } from "../ColosseumRegion";
+import { Region } from "../../../../sdk/Region";
+import { Viewport } from "../../../../sdk/Viewport";
 
 enum SolAnimations {
   Idle = 0,
@@ -142,7 +144,7 @@ export class SolHeredit extends Mob {
   lastLocation = { ...this.location };
 
   phaseId = -1;
-  poolCache: {[xy: string]: boolean} = {};
+  poolCache: { [xy: string]: boolean } = {};
   finalPhasePoolTimer = 7; // once the phase transition is up
 
   // melee prayer overhead history of target
@@ -218,6 +220,23 @@ export class SolHeredit extends Mob {
     };
   }
 
+  override contextActions(region: Region, x: number, y: number) {
+    return super.contextActions(region, x, y).concat(
+      PHASE_TRANSITION_POINTS.map(([hp], idx) => ({
+        text: [
+          { text: "Set to ", fillStyle: "white" },
+          { text: `${hp}`, fillStyle: "yellow" },
+          { text: " hp ", fillStyle: "white" },
+        ],
+        action: () => {
+          Viewport.viewport.clickController.redClick();
+          this.phaseId = idx;
+          this.currentStats.hitpoint = hp;
+        },
+      })),
+    );
+  }
+
   get attackSpeed() {
     // irrelevant
     return 7;
@@ -257,10 +276,15 @@ export class SolHeredit extends Mob {
 
     this.attackFeedback = AttackIndicators.NONE;
 
-    if (ColosseumSettings.usePhaseTransitions && this.attackDelay <= 0 && this.phaseId < PHASE_TRANSITION_POINTS.length - 1) {
+    if (
+      ColosseumSettings.usePhaseTransitions &&
+      this.attackDelay <= 0 &&
+      this.phaseId < PHASE_TRANSITION_POINTS.length - 1
+    ) {
       const [threshold, message] = PHASE_TRANSITION_POINTS[this.phaseId + 1];
       if (this.currentStats.hitpoint <= threshold) {
-        if (this.phaseId >= 0) { // none on the first phase transition
+        if (this.phaseId >= 0) {
+          // none on the first phase transition
           this.forceAttack = Attacks.PHASE_TRANSITION;
         }
         this.phaseId++;
@@ -270,7 +294,7 @@ export class SolHeredit extends Mob {
     if (this.phaseId === 5) {
       if (--this.finalPhasePoolTimer === 0) {
         this.tryPlacePools(1);
-        this.finalPhasePoolTimer = 0;
+        this.finalPhasePoolTimer = 3;
       }
     }
 
@@ -338,7 +362,10 @@ export class SolHeredit extends Mob {
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useTriple && !this.didChooseSpecial && this.phaseId >= 3 && [Attacks.TRIPLE_LONG]),
-      ...(ColosseumSettings.useTriple && !this.didChooseSpecial && this.phaseId >= 1 && this.phaseId < 3 && [Attacks.TRIPLE_SHORT]),
+      ...(ColosseumSettings.useTriple &&
+        !this.didChooseSpecial &&
+        this.phaseId >= 1 &&
+        this.phaseId < 3 && [Attacks.TRIPLE_SHORT]),
       ...(ColosseumSettings.useGrapple && !this.didChooseSpecial && this.phaseId >= 2 && [Attacks.GRAPPLE]),
     ];
     if (attackPool.length === 0) {
@@ -652,27 +679,39 @@ export class SolHeredit extends Mob {
   private phaseTransition(toPhase: number) {
     this.freeze(5);
     const lastAggro = this.aggro;
-    const {x , y} = this.aggro.location;
+    const { x, y } = this.aggro.location;
     this.tryPlacePool(x, y);
     const numOtherPools = toPhase === 5 ? 4 : 5;
     this.tryPlacePools(numOtherPools);
     this.aggro = null;
-    DelayedAction.registerDelayedAction(new DelayedAction(() => {
-      this.aggro = lastAggro;
-    }, 5));
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => {
+        this.aggro = lastAggro;
+      }, 5),
+    );
 
     return 7;
   }
 
   private tryPlacePools(amount: number) {
     SoundCache.play(POOL_SPAWN);
-    DelayedAction.registerDelayedAction(new DelayedAction(() => {
-      SoundCache.play(POOL_SHRIEK);
-    }, 3));
-    const {x , y} = this.aggro.location;
-    for (let i = 0 ; i < amount; ++i) {
-      const xx = _.clamp(x - 4 + Math.floor(Random.get() * 9), ColosseumRegion.ARENA_WEST + 1, ColosseumRegion.ARENA_EAST - 1);
-      const yy = _.clamp(y - 4 + Math.floor(Random.get() * 9), ColosseumRegion.ARENA_NORTH + 1, ColosseumRegion.ARENA_SOUTH - 1);
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => {
+        SoundCache.play(POOL_SHRIEK);
+      }, 3),
+    );
+    const { x, y } = this.aggro.location;
+    for (let i = 0; i < amount; ++i) {
+      const xx = _.clamp(
+        x - 4 + Math.floor(Random.get() * 9),
+        ColosseumRegion.ARENA_WEST + 1,
+        ColosseumRegion.ARENA_EAST - 1,
+      );
+      const yy = _.clamp(
+        y - 4 + Math.floor(Random.get() * 9),
+        ColosseumRegion.ARENA_NORTH + 1,
+        ColosseumRegion.ARENA_SOUTH - 1,
+      );
       this.tryPlacePool(xx, yy);
     }
   }
