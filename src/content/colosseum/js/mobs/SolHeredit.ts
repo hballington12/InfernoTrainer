@@ -324,7 +324,10 @@ export class SolHeredit extends Mob {
       return this.forceAttack;
     }
     const attackPool = [
+      // hacky 2x weighting for autos
       ...(ColosseumSettings.useShields && [Attacks.SHIELD]),
+      ...(ColosseumSettings.useShields && [Attacks.SHIELD]),
+      ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useTripleLong && [Attacks.TRIPLE_LONG]),
       ...(ColosseumSettings.useTripleShort && [Attacks.TRIPLE_SHORT]),
