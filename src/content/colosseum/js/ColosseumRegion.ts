@@ -153,9 +153,9 @@ export class ColosseumRegion extends Region {
     };
     setupAttackConfig("use_shield", "useShields");
     setupAttackConfig("use_spears", "useSpears");
-    setupAttackConfig("use_triple_short", "useTripleShort");
-    setupAttackConfig("use_triple_long", "useTripleLong");
+    setupAttackConfig("use_triple", "useTriple");
     setupAttackConfig("use_grapple", "useGrapple");
+    setupAttackConfig("use_phase_transitions", "usePhaseTransitions");
 
     return {
       player: player,

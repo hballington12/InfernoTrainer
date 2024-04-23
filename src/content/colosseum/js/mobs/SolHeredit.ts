@@ -108,10 +108,10 @@ export enum Attacks {
 export const PHASE_TRANSITION_POINTS: [number, string][] = [
   [1500, "Let's start by testing your footwork."],
   [1350, "Not bad. Let's try something else..."],
-  [1110, "Impressive. Let's see how you handle this..."],
-  [700, "You can't win!"],
-  [350, "Ralos guides my hand!"],
-  [110, "LET'S END THIS!"],
+  [1125, "Impressive. Let's see how you handle this..."],
+  [750, "You can't win!"],
+  [375, "Ralos guides my hand!"],
+  [150, "LET'S END THIS!"],
 ];
 
 const GRAPPLE_SLOTS: { [slot in EquipmentTypes]?: string } = {
@@ -134,7 +134,10 @@ export class SolHeredit extends Mob {
   // public for testing
   firstSpear = true;
   firstShield = true;
-  forceAttack: Attacks | null = null;
+
+  didChooseSpecial = false;
+
+  forceAttack: Attacks | null = Attacks.SPEAR; // first attack is always a spear?
 
   lastLocation = { ...this.location };
 
@@ -254,7 +257,7 @@ export class SolHeredit extends Mob {
 
     this.attackFeedback = AttackIndicators.NONE;
 
-    if (this.attackDelay <= 0 && this.phaseId < PHASE_TRANSITION_POINTS.length - 1) {
+    if (ColosseumSettings.usePhaseTransitions && this.attackDelay <= 0 && this.phaseId < PHASE_TRANSITION_POINTS.length - 1) {
       const [threshold, message] = PHASE_TRANSITION_POINTS[this.phaseId + 1];
       if (this.currentStats.hitpoint <= threshold) {
         if (this.phaseId >= 0) { // none on the first phase transition
@@ -262,7 +265,6 @@ export class SolHeredit extends Mob {
         }
         this.phaseId++;
         this.setOverheadText(message);
-        this.finalPhasePoolTimer
       }
     }
     if (this.phaseId === 5) {
@@ -301,15 +303,19 @@ export class SolHeredit extends Mob {
           nextDelay = this.attackSpear();
           break;
         case Attacks.TRIPLE_SHORT:
+          this.didChooseSpecial = true;
           nextDelay = this.attackTripleShort();
           break;
         case Attacks.TRIPLE_LONG:
+          this.didChooseSpecial = true;
           nextDelay = this.attackTripleLong();
           break;
         case Attacks.GRAPPLE:
+          this.didChooseSpecial = true;
           nextDelay = this.attackGrapple();
           break;
         case Attacks.PHASE_TRANSITION:
+          this.didChooseSpecial = true;
           nextDelay = this.phaseTransition(this.phaseId);
           break;
       }
@@ -326,9 +332,9 @@ export class SolHeredit extends Mob {
     const attackPool = [
       ...(ColosseumSettings.useShields && [Attacks.SHIELD]),
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
-      ...(ColosseumSettings.useTripleLong && [Attacks.TRIPLE_LONG]),
-      ...(ColosseumSettings.useTripleShort && [Attacks.TRIPLE_SHORT]),
-      ...(ColosseumSettings.useGrapple && [Attacks.GRAPPLE]),
+      ...(ColosseumSettings.useTriple && !this.didChooseSpecial && this.phaseId >= 3 && [Attacks.TRIPLE_LONG]),
+      ...(ColosseumSettings.useTriple && !this.didChooseSpecial && this.phaseId >= 1 && this.phaseId < 3 && [Attacks.TRIPLE_SHORT]),
+      ...(ColosseumSettings.useGrapple && !this.didChooseSpecial && this.phaseId >= 2 && [Attacks.GRAPPLE]),
     ];
     if (attackPool.length === 0) {
       return null;
@@ -346,7 +352,7 @@ export class SolHeredit extends Mob {
     DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(SPEAR_END), 3));
     this.firstSpear = !this.firstSpear;
     this.firstShield = true;
-    return 7;
+    return this.phaseId < 2 ? 7 : 6;
   }
 
   private attackShield() {
@@ -359,7 +365,7 @@ export class SolHeredit extends Mob {
     DelayedAction.registerDelayedAction(new DelayedAction(() => SoundCache.play(SHIELD_END), 3));
     this.firstSpear = true;
     this.firstShield = !this.firstShield;
-    return 6;
+    return this.phaseId < 2 ? 6 : 5;
   }
 
   private fillRect(fromX: number, fromY: number, toX: number, toY: number, exceptRadius = null) {
@@ -538,7 +544,7 @@ export class SolHeredit extends Mob {
     // used above 50%
     this.playAnimation(SolAnimations.TripleAttackShort);
     this._attackTriple(true);
-    return 12; // should be 11 between 50% and 75%
+    return this.phaseId >= 2 ? 11 : 12; // should be 11 between 50% and 75%
   }
 
   private attackTripleLong() {
@@ -585,7 +591,7 @@ export class SolHeredit extends Mob {
         EquipmentControls?.instance.resetEquipmentInteractions();
       }, 3),
     );
-    return 8; // should be 7 under 75%
+    return 7; // only used under 75%, so always at 7
   }
 
   private _attackTriple(short: boolean) {
