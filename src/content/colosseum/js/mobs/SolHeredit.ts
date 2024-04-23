@@ -298,9 +298,11 @@ export class SolHeredit extends Mob {
       switch (nextAttack) {
         case Attacks.SHIELD:
           nextDelay = this.attackShield();
+          this.didChooseSpecial = false;
           break;
         case Attacks.SPEAR:
           nextDelay = this.attackSpear();
+          this.didChooseSpecial = false;
           break;
         case Attacks.TRIPLE_SHORT:
           this.didChooseSpecial = true;
