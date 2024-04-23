@@ -19,6 +19,11 @@ import { ColosseumSettings } from "./ColosseumSettings";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class ColosseumRegion extends Region {
+  static ARENA_WEST = 19 as const;
+  static ARENA_EAST = 34 as const;
+  static ARENA_NORTH = 18 as const;
+  static ARENA_SOUTH = 33 as const;
+
   wave: number;
   mapImage: HTMLImageElement = ImageLoader.createImage(InfernoMapImage);
 
@@ -194,7 +199,7 @@ export class ColosseumRegion extends Region {
         break;
       case 12:
         boss.currentStats.hitpoint = 1337;
-        boss.stunned = 6; // TODO phase
+        //boss.stunned = 6; // TODO phase
         break;
       case 14:
         player.moveTo(23, 22);
