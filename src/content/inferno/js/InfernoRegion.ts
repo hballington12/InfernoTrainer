@@ -30,8 +30,11 @@ import { InvisibleMovementBlocker } from "../../MovementBlocker";
 import SidebarContent from "../sidebar.html";
 import { Mob } from "../../../sdk/Mob";
 import { ControlPanelController } from "../../../sdk/ControlPanelController";
+import { SolHeredit } from "../../colosseum/js/mobs/SolHeredit";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+const SECRET_WAVE = 420;
 
 export class InfernoRegion extends Region {
   wave: number;
@@ -301,7 +304,7 @@ export class InfernoRegion extends Region {
     if (this.wave < 0) {
       this.wave = 0;
     }
-    if (this.wave > InfernoWaves.waves.length + 8) {
+    if (this.wave > InfernoWaves.waves.length + 8 && this.wave !== SECRET_WAVE) {
       this.wave = InfernoWaves.waves.length + 8;
     }
 
@@ -309,7 +312,7 @@ export class InfernoRegion extends Region {
     loadout.setStats(player); // flip this around one day
     player.setUnitOptions(loadout.getLoadout());
 
-    if (this.wave < 67 || this.wave >= 70) {
+    if (this.wave < 67 || this.wave >= 70 && this.wave !== SECRET_WAVE) {
       // Add pillars
       InfernoPillar.addPillarsToWorld(this, southPillar, westPillar, northPillar);
     }
@@ -423,7 +426,7 @@ export class InfernoRegion extends Region {
         { aggro: player, attackSpeed: 9, stun: 4, healers: 3, isZukWave: false },
       );
       this.addMob(jad3);
-    } else if (this.wave === 69) {
+    } else if (this.wave === 69 || this.wave === SECRET_WAVE) {
       player.location = { x: 25, y: 15 };
 
       // spawn zuk
@@ -469,6 +472,9 @@ export class InfernoRegion extends Region {
     } else if (this.wave === 74) {
       player.location = { x: 28, y: 17 };
       importSpawn();
+    }
+    if (this.wave === SECRET_WAVE) {
+      this.addMob(new SolHeredit(this, { x: 23, y: 21 }, { aggro: player}));
     }
 
 
