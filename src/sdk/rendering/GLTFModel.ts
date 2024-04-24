@@ -209,6 +209,12 @@ export class GLTFModel implements Model, RenderableListener {
     const processGltf = (gltf: GLTF, clone = false) => {
       const scale = this.scale;
       gltf.scene.name = model;
+
+      gltf.scene.traverse((o: any) => {
+        if (o.isMesh) {
+          o.material.name = model;
+        }
+      });
       // make adjustments
       gltf.scene.scale.set(scale, scale, scale);
       const { animations } = gltf;
