@@ -21,7 +21,7 @@ import { Pathing } from "../../../../sdk/Pathing";
 import { EquipmentControls } from "../../../../sdk/controlpanels/EquipmentControls";
 import { EquipmentTypes } from "../../../../sdk/Equipment";
 
-export const SolHereditModel = Assets.getAssetUrl("models/sol.glb");
+export const SolHereditModel = Assets.getAssetUrl("models/sol2.glb");
 
 import SpearStart from "../../assets/sounds/8147_spear.ogg";
 import SpearEnd from "../../assets/sounds/8047_spear_swing.ogg";
@@ -45,15 +45,14 @@ import { Region } from "../../../../sdk/Region";
 import { Viewport } from "../../../../sdk/Viewport";
 
 enum SolAnimations {
-  Idle = 0,
-  Walk = 1,
-  SpearFast = 2,
-  SpearSlow = 3,
-  Grapple = 4,
-  Shield = 5,
-  TripleAttackLong = 6,
-  TripleAttackShort = 7,
-  Death = 8,
+  Idle = 0, // 10874
+  Walk = 1, // 10878
+  SpearSlow = 2, // 10883
+  Grapple = 3,// 10884
+  Shield = 4, // 10885
+  TripleAttackLong = 5, // 10886
+  TripleAttackShort = 6, // 10887
+  Death = 7, // 10888
 }
 
 enum AttackDirection {
