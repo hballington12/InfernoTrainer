@@ -39,10 +39,14 @@ import GrappleCharge from "../../assets/sounds/8329_grapple_charge.ogg";
 import GrappleParry from "../../assets/sounds/8081_grapple_parry.ogg";
 import PoolSpawn from "../../assets/sounds/8053_pool_spawn.ogg";
 import PoolShriek from "../../assets/sounds/8093_pool_shriek.ogg";
+import LaserCharge from "../../assets/sounds/8253_laser.ogg";
+import LaserFire from "../../assets/sounds/8230_laser_fire.ogg";
+
 import { SolSandPool } from "../entities/SolSandPool";
 import { ColosseumRegion } from "../ColosseumRegion";
 import { Region } from "../../../../sdk/Region";
 import { Viewport } from "../../../../sdk/Viewport";
+import { Edge, LaserOrb } from "../entities/LaserOrb";
 
 enum SolAnimations {
   Idle = 0, // 10874
@@ -96,6 +100,8 @@ const GRAPPLE_PARRY = new Sound(GrappleParry, 0.1);
 
 const POOL_SPAWN = new Sound(PoolSpawn, 0.1);
 const POOL_SHRIEK = new Sound(PoolShriek, 0.1);
+const LASER_CHARGE = new Sound(LaserCharge, 0.1);
+const LASER_FIRE = new Sound(LaserFire, 0.1);
 
 const SPECIAL_ATTACK_COOLDOWN = 2;
 
@@ -132,6 +138,11 @@ class ParryUnblockableWeapon extends MeleeWeapon {
   }
 }
 
+
+const MIN_LASER_ORB_COOLDOWN = 25;
+const MAX_LASER_ORB_COOLDOWN = 35;
+const ENRAGE_LASER_ORB_COOLDOWN = 12;
+
 export class SolHeredit extends Mob {
   shouldRespawnMobs: boolean;
   // public for testing
@@ -143,6 +154,9 @@ export class SolHeredit extends Mob {
   forceAttack: Attacks | null = Attacks.SPEAR; // first attack is always a spear?
 
   lastLocation = { ...this.location };
+
+  laserOrbs: LaserOrb[];
+  laserOrbCooldown = MIN_LASER_ORB_COOLDOWN;
 
   phaseId = -1;
   poolCache: { [xy: string]: boolean } = {};
@@ -178,6 +192,7 @@ export class SolHeredit extends Mob {
   }
 
   setStats() {
+    this.laserOrbs = [];
     this.stunned = 4;
     this.weapons = {
       stab: new MeleeWeapon(),
@@ -272,6 +287,7 @@ export class SolHeredit extends Mob {
   }
 
   attackIfPossible() {
+    this.laserOrbCooldown--;
     this.overheadHistory.push(!!this.aggro?.prayerController.overhead());
     this.attackStyle = this.attackStyleForNewAttack();
 
@@ -349,6 +365,10 @@ export class SolHeredit extends Mob {
       }
       this.didAttack();
       this.attackDelay = nextDelay;
+      // trigger laser orbs on anything but a phase transition
+      if (nextAttack !== Attacks.PHASE_TRANSITION && this.laserOrbs.length > 0 && this.laserOrbCooldown < 0) {
+        this.fireOrbs();
+      }
     }
   }
 
@@ -692,11 +712,17 @@ export class SolHeredit extends Mob {
         this.aggro = lastAggro;
       }, 5),
     );
+    if (toPhase >= 1 && toPhase <= 4) {
+      this.createLaserOrb();
+    }
 
     return 7;
   }
 
   private tryPlacePools(amount: number) {
+    if (!this.aggro) {
+      return;
+    }
     SoundCache.play(POOL_SPAWN);
     DelayedAction.registerDelayedAction(
       new DelayedAction(() => {
@@ -750,6 +776,27 @@ export class SolHeredit extends Mob {
       // technically also if dx = 0 and dy = 0, i.e. you're under the boss
       return AttackDirection.SouthWest;
     }
+  }
+
+  private createLaserOrb() {
+    if (this.laserOrbs.length >= 4) {
+      return;
+    }
+    const orbEdge = [Edge.NORTH, Edge.EAST, Edge.SOUTH, Edge.WEST][this.laserOrbs.length];
+    const orb = LaserOrb.onEdge(this.region, orbEdge);
+    this.laserOrbs.push(orb);
+    this.region.addEntity(orb);
+  }
+
+  private fireOrbs() {
+    this.laserOrbs.forEach((orb) => orb.fire());
+    this.laserOrbCooldown = MIN_LASER_ORB_COOLDOWN + Math.floor(Random.get() * (MAX_LASER_ORB_COOLDOWN - MIN_LASER_ORB_COOLDOWN));
+    DelayedAction.registerDelayedAction(new DelayedAction(() => {
+      SoundCache.play(LASER_CHARGE);
+    }, 3));
+    DelayedAction.registerDelayedAction(new DelayedAction(() => {
+      SoundCache.play(LASER_FIRE);
+    }, 7));
   }
 
   create3dModel() {
