@@ -97,7 +97,7 @@ const GRAPPLE_PARRY = new Sound(GrappleParry, 0.1);
 const POOL_SPAWN = new Sound(PoolSpawn, 0.1);
 const POOL_SHRIEK = new Sound(PoolShriek, 0.1);
 
-const SPECIAL_ATTACK_COOLDOWN = 3;
+const SPECIAL_ATTACK_COOLDOWN = 2;
 
 export enum Attacks {
   SPEAR = "spear",
