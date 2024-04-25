@@ -97,6 +97,8 @@ const GRAPPLE_PARRY = new Sound(GrappleParry, 0.1);
 const POOL_SPAWN = new Sound(PoolSpawn, 0.1);
 const POOL_SHRIEK = new Sound(PoolShriek, 0.1);
 
+const SPECIAL_ATTACK_COOLDOWN = 3;
+
 export enum Attacks {
   SPEAR = "spear",
   SHIELD = "shield",
@@ -136,7 +138,7 @@ export class SolHeredit extends Mob {
   firstSpear = true;
   firstShield = true;
 
-  didChooseSpecial = false;
+  specialAttackCooldown = 0;
 
   forceAttack: Attacks | null = Attacks.SPEAR; // first attack is always a spear?
 
@@ -322,26 +324,25 @@ export class SolHeredit extends Mob {
       switch (nextAttack) {
         case Attacks.SHIELD:
           nextDelay = this.attackShield();
-          this.didChooseSpecial = false;
+          this.specialAttackCooldown--;
           break;
         case Attacks.SPEAR:
           nextDelay = this.attackSpear();
-          this.didChooseSpecial = false;
+          this.specialAttackCooldown--;
           break;
         case Attacks.TRIPLE_SHORT:
-          this.didChooseSpecial = true;
+          this.specialAttackCooldown = SPECIAL_ATTACK_COOLDOWN;
           nextDelay = this.attackTripleShort();
           break;
         case Attacks.TRIPLE_LONG:
-          this.didChooseSpecial = true;
+          this.specialAttackCooldown = SPECIAL_ATTACK_COOLDOWN;
           nextDelay = this.attackTripleLong();
           break;
         case Attacks.GRAPPLE:
-          this.didChooseSpecial = true;
+          this.specialAttackCooldown = SPECIAL_ATTACK_COOLDOWN;
           nextDelay = this.attackGrapple();
           break;
         case Attacks.PHASE_TRANSITION:
-          this.didChooseSpecial = true;
           this.forceAttack = Attacks.SPEAR;
           nextDelay = this.phaseTransition(this.phaseId);
           break;
@@ -355,18 +356,20 @@ export class SolHeredit extends Mob {
     if (this.forceAttack) {
       return this.forceAttack;
     }
+    const canSpecial = this.specialAttackCooldown <= 0;
+
     const attackPool = [
       // hacky 2x weighting for autos
       ...(ColosseumSettings.useShields && [Attacks.SHIELD]),
       ...(ColosseumSettings.useShields && [Attacks.SHIELD]),
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
-      ...(ColosseumSettings.useTriple && !this.didChooseSpecial && this.phaseId >= 3 && [Attacks.TRIPLE_LONG]),
+      ...(ColosseumSettings.useTriple && canSpecial && this.phaseId >= 3 && [Attacks.TRIPLE_LONG]),
       ...(ColosseumSettings.useTriple &&
-        !this.didChooseSpecial &&
+        canSpecial &&
         this.phaseId >= 1 &&
         this.phaseId < 3 && [Attacks.TRIPLE_SHORT]),
-      ...(ColosseumSettings.useGrapple && !this.didChooseSpecial && this.phaseId >= 2 && [Attacks.GRAPPLE]),
+      ...(ColosseumSettings.useGrapple && canSpecial && this.phaseId >= 2 && [Attacks.GRAPPLE]),
     ];
     if (attackPool.length === 0) {
       return null;
