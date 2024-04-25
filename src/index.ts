@@ -34,7 +34,7 @@ const AVAILABLE_REGIONS = {
   'inferno.html': new InfernoRegion(),
   'colosseum.html': new ColosseumRegion(),
 };
-const DEFAULT_REGION_PATH = process.env.DEPLOY_URL?.includes('colosim') ? 'colosseum.html' : 'inferno.html';
+const DEFAULT_REGION_PATH = 'colosseum.html';
 
 const regionName = window.location.pathname.split('/').pop();
 const selectedRegion: Region = (regionName in AVAILABLE_REGIONS) ? AVAILABLE_REGIONS[regionName] : AVAILABLE_REGIONS[DEFAULT_REGION_PATH];
@@ -161,8 +161,6 @@ window.newrelic.addRelease("inferno-trainer", process.env.COMMIT_REF);
 
 // UI disclaimer
 const topHeaderContainer = document.getElementById("disclaimer_panel");
-if (!process.env.DEPLOY_URL?.includes("infernotrainer.com")) {
-  topHeaderContainer.innerHTML =
-    'PREVIEW BUILD for 3D mode. Visit <a href="https://www.infernotrainer.com">infernotrainer.com</a> for the original.<br />' +
-    topHeaderContainer.innerHTML;
-}
+topHeaderContainer.innerHTML =
+  'Work in progress.<br />' +
+  topHeaderContainer.innerHTML;
