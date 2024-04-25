@@ -7,6 +7,7 @@ export class ColosseumSettings {
   static useTriple = true;
   static useGrapple = true;
   static usePhaseTransitions = true;
+  static solarFlareLevel = 1;
 
   static persistToStorage() {
     window.localStorage.setItem("useShields", String(ColosseumSettings.useShields));
@@ -14,6 +15,7 @@ export class ColosseumSettings {
     window.localStorage.setItem("useTriple", String(ColosseumSettings.useTriple));
     window.localStorage.setItem("useGrapple", String(ColosseumSettings.useGrapple));
     window.localStorage.setItem("usePhaseTransitions", String(ColosseumSettings.usePhaseTransitions));
+    window.localStorage.setItem("solarFlareLevel", String(ColosseumSettings.solarFlareLevel));
   }
 
   static readFromStorage() {
@@ -22,5 +24,6 @@ export class ColosseumSettings {
     ColosseumSettings.useTriple = window.localStorage.getItem("useTriple") !== "false" || false;
     ColosseumSettings.useGrapple = window.localStorage.getItem("useGrapple") !== "false" || false;
     ColosseumSettings.usePhaseTransitions = window.localStorage.getItem("usePhaseTransitions") !== "false" || false;
+    ColosseumSettings.solarFlareLevel = parseInt(window.localStorage.getItem("solarFlareLevel") ?? '1');
   }
 }
