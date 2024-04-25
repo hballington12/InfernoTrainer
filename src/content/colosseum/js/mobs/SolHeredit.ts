@@ -392,6 +392,8 @@ export class SolHeredit extends Mob {
       ...(ColosseumSettings.useGrapple && canSpecial && this.phaseId >= 2 && [Attacks.GRAPPLE]),
     ];
     if (attackPool.length === 0) {
+      // at least allow it to do something
+      this.specialAttackCooldown = 0;
       return null;
     }
     return attackPool[Math.floor(Random.get() * attackPool.length)];
@@ -790,7 +792,12 @@ export class SolHeredit extends Mob {
 
   private fireOrbs() {
     this.laserOrbs.forEach((orb) => orb.fire());
-    this.laserOrbCooldown = MIN_LASER_ORB_COOLDOWN + Math.floor(Random.get() * (MAX_LASER_ORB_COOLDOWN - MIN_LASER_ORB_COOLDOWN));
+    if (this.phaseId < 5) {
+      this.laserOrbCooldown =
+        MIN_LASER_ORB_COOLDOWN + Math.floor(Random.get() * (MAX_LASER_ORB_COOLDOWN - MIN_LASER_ORB_COOLDOWN));
+    } else {
+      this.laserOrbCooldown = ENRAGE_LASER_ORB_COOLDOWN;
+    }
     DelayedAction.registerDelayedAction(new DelayedAction(() => {
       SoundCache.play(LASER_CHARGE);
     }, 3));
