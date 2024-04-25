@@ -21,7 +21,7 @@ import { Projectile } from "./weapons/Projectile";
 // how many pixels wide should 2d elements be scaled to
 const SPRITE_SCALE = 32;
 
-const MIN_PITCH = -1;
+const MIN_PITCH = -Math.PI / 2;
 const MAX_PITCH = 0.1;
 
 const FLOOR_Y_POS = -0.5;
