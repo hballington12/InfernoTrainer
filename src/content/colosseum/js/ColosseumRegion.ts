@@ -16,6 +16,7 @@ import SidebarContent from "../sidebar.html";
 import { WallMan } from "./entities/WallMan";
 import { ColosseumSettings } from "./ColosseumSettings";
 import { SolarFlareOrb } from "./entities/SolarFlareOrb";
+import { fromHalfFloat } from "three/src/extras/DataUtils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -136,7 +137,6 @@ export class ColosseumRegion extends Region {
 
     this.addMob(new SolHeredit(this, { x: 25, y: 24 }, { aggro: player }));
 
-
     // Add 3d scene
     if (Settings.use3dView) {
       this.addEntity(new ColosseumScene(this, { x: 0, y: 48 }));
@@ -144,7 +144,7 @@ export class ColosseumRegion extends Region {
 
     // setup UI and settings
     ColosseumSettings.readFromStorage();
-    
+
     const setupAttackConfig = (elementId: string, field: keyof typeof ColosseumSettings) => {
       const checkbox = document.getElementById(elementId) as HTMLInputElement;
       checkbox.checked = ColosseumSettings[field] as boolean;
@@ -162,39 +162,42 @@ export class ColosseumRegion extends Region {
     solarFlareDropdown.value = ColosseumSettings.solarFlareLevel.toString();
     solarFlareDropdown.addEventListener("change", () => {
       ColosseumSettings.solarFlareLevel = parseInt(solarFlareDropdown.value);
-      if (ColosseumSettings.solarFlareLevel === 0) {
-        this.despawnSolarFlares();
-      } else {
-        this.updateSolarFlares();
-      }
       ColosseumSettings.persistToStorage();
+      this.updateSolarFlares();
     });
-
     this.updateSolarFlares();
 
     return {
       player: player,
     };
   }
-  
+
   private updateSolarFlares() {
+    if (ColosseumSettings.solarFlareLevel === 0) {
+      this.despawnSolarFlares();
+      return;
+    }
     if (this.entities.filter((entity) => entity instanceof SolarFlareOrb).length === 0) {
-      this.addEntity(new SolarFlareOrb(this, { x: 21, y: 20 }, ColosseumSettings.solarFlareLevel, 2 ));
-      this.addEntity(new SolarFlareOrb(this, { x: 28, y: 20 }, ColosseumSettings.solarFlareLevel, 3 ));
-      this.addEntity(new SolarFlareOrb(this, { x: 21, y: 27 }, ColosseumSettings.solarFlareLevel, 1 ));
-      this.addEntity(new SolarFlareOrb(this, { x: 28, y: 27 }, ColosseumSettings.solarFlareLevel, 0 ));
+      this.addEntity(new SolarFlareOrb(this, { x: 21, y: 20 }, ColosseumSettings.solarFlareLevel, 2));
+      this.addEntity(new SolarFlareOrb(this, { x: 28, y: 20 }, ColosseumSettings.solarFlareLevel, 3));
+      this.addEntity(new SolarFlareOrb(this, { x: 21, y: 27 }, ColosseumSettings.solarFlareLevel, 1));
+      this.addEntity(new SolarFlareOrb(this, { x: 28, y: 27 }, ColosseumSettings.solarFlareLevel, 0));
     } else {
-      this.entities.filter((entity) => entity instanceof SolarFlareOrb).forEach((entity) => {
-        (entity as SolarFlareOrb).setLevel(ColosseumSettings.solarFlareLevel);
-      });
+      this.entities
+        .filter((entity) => entity instanceof SolarFlareOrb)
+        .forEach((entity) => {
+          (entity as SolarFlareOrb).setLevel(ColosseumSettings.solarFlareLevel);
+        });
     }
   }
 
   private despawnSolarFlares() {
-    this.entities.filter((entity) => entity instanceof SolarFlareOrb).forEach((entity) => {
-      entity.dying = 0;
-      this.removeEntity(entity)
-    });
+    this.entities
+      .filter((entity) => entity instanceof SolarFlareOrb)
+      .forEach((entity) => {
+        entity.dying = 0;
+        this.removeEntity(entity);
+      });
   }
 
   private enableReplay = false;

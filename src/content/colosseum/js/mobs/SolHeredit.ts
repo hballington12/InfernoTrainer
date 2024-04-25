@@ -716,6 +716,8 @@ export class SolHeredit extends Mob {
     );
     if (toPhase >= 1 && toPhase <= 4) {
       this.createLaserOrb();
+    } else if (toPhase >= 5) {
+      this.laserOrbCooldown = ENRAGE_LASER_ORB_COOLDOWN; // force laser
     }
 
     return 7;
