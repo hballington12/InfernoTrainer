@@ -731,7 +731,7 @@ export class SolHeredit extends Mob {
     DelayedAction.registerDelayedAction(
       new DelayedAction(() => {
         SoundCache.play(POOL_SHRIEK);
-      }, 3),
+      }, 2),
     );
     const { x, y } = this.aggro.location;
     for (let i = 0; i < amount; ++i) {

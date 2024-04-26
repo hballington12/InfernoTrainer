@@ -78,7 +78,7 @@ export class SolarFlareOrb extends Entity {
 
   tick() {
     const player = Viewport.viewport.player;
-    if (this.moveTick <= 1 && player.dying < 0 && player.location.x === this.location.x && player.location.y === this.location.y) {
+    if (this.moveTick <= 0 && player.dying < 0 && player.location.x === this.location.x && player.location.y === this.location.y) {
       const damage = this.level <= 1 ? 5 + Math.floor(Random.get() * 5) : 10 + Math.floor(Random.get() * 10);
       player.addProjectile(new Projectile(null, damage, player, player, "typeless", { setDelay: 0 }));
       if (this.level === 3) {

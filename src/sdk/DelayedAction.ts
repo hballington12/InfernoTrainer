@@ -14,11 +14,18 @@ export class DelayedAction {
     this.identifier = Math.random() * 1000000;
   }
 
+  /**
+   * Register a delayed action to be called in the middle of a tick (after npc actions, before player actions).
+   * Use this if you need an action that reads from an NPC and writes to a player in the same tick.
+   */
   static registerDelayedNpcAction(delayedAction: DelayedAction): number {
     DelayedAction.delayedNpcActions.push(delayedAction);
     return delayedAction.identifier;
   }
 
+  /**
+   * Register a delayed action to be called at the end of the tick (after player action)
+   */
   static registerDelayedAction(delayedAction: DelayedAction): number {
     DelayedAction.delayedActions.push(delayedAction);
     return delayedAction.identifier;
