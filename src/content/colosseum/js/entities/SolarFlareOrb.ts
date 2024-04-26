@@ -78,15 +78,6 @@ export class SolarFlareOrb extends Entity {
 
   tick() {
     const player = Viewport.viewport.player;
-    if (this.moveTick <= 0 && player.dying < 0 && player.location.x === this.location.x && player.location.y === this.location.y) {
-      const damage = this.level <= 1 ? 5 + Math.floor(Random.get() * 5) : 10 + Math.floor(Random.get() * 10);
-      player.addProjectile(new Projectile(null, damage, player, player, "typeless", { setDelay: 0 }));
-      if (this.level === 3) {
-        player.prayerController.findPrayerByName("Protect from Melee")?.deactivate();
-        player.prayerController.findPrayerByName("Protect from Range")?.deactivate();
-        player.prayerController.findPrayerByName("Protect from Magic")?.deactivate();
-      }
-    }
     if (this.waitTicks <= 0 && this.moveTick <= 0) {
       this.lastLocation = {
         x: this.location.x,
@@ -113,6 +104,15 @@ export class SolarFlareOrb extends Entity {
     }
     --this.moveTick;
     --this.waitTicks;
+    if (this.moveTick <= 0 && player.dying < 0 && player.location.x === this.location.x && player.location.y === this.location.y) {
+      const damage = this.level <= 1 ? 5 + Math.floor(Random.get() * 5) : 10 + Math.floor(Random.get() * 10);
+      player.addProjectile(new Projectile(null, damage, player, player, "typeless", { setDelay: 0 }));
+      if (this.level === 3) {
+        player.prayerController.findPrayerByName("Protect from Melee")?.deactivate();
+        player.prayerController.findPrayerByName("Protect from Range")?.deactivate();
+        player.prayerController.findPrayerByName("Protect from Magic")?.deactivate();
+      }
+    }
   }
 
   public setLevel(level: number) {
