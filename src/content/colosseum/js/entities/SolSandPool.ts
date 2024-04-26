@@ -77,7 +77,7 @@ export class SolSandPool extends Entity {
     if (player.dying >= 0) {
       return;
     }
-    if (this.age >= 2 && player.location.x === this.location.x && player.location.y === this.location.y) {
+    if (this.age >= 3 && player.location.x === this.location.x && player.location.y === this.location.y) {
       const damage = 5 + Math.floor(Random.get() * 5);
       player.addProjectile(new Projectile(null, damage, player, player, "typeless", { setDelay: 0 }));
     }

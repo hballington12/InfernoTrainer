@@ -200,7 +200,7 @@ export class ColosseumRegion extends Region {
       });
   }
 
-  private enableReplay = false;
+  private enableReplay = true;
   private replayTick = 1;
   override postTick() {
     if (!this.enableReplay || this.world.getReadyTimer > 0) {
@@ -237,7 +237,6 @@ export class ColosseumRegion extends Region {
         break;
       case 12:
         boss.currentStats.hitpoint = 1337;
-        //boss.stunned = 6; // TODO phase
         break;
       case 14:
         player.moveTo(23, 22);

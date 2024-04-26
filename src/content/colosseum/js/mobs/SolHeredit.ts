@@ -52,7 +52,7 @@ enum SolAnimations {
   Idle = 0, // 10874
   Walk = 1, // 10878
   SpearSlow = 2, // 10883
-  Grapple = 3,// 10884
+  Grapple = 3, // 10884
   Shield = 4, // 10885
   TripleAttackLong = 5, // 10886
   TripleAttackShort = 6, // 10887
@@ -137,7 +137,6 @@ class ParryUnblockableWeapon extends MeleeWeapon {
     return false;
   }
 }
-
 
 const MIN_LASER_ORB_COOLDOWN = 25;
 const MAX_LASER_ORB_COOLDOWN = 35;
@@ -308,9 +307,9 @@ export class SolHeredit extends Mob {
         this.setOverheadText(message);
       }
     }
-    if (this.phaseId === 5) {
+    if (this.phaseId === 5 && this.aggro) {
       if (--this.finalPhasePoolTimer === 0) {
-        this.tryPlacePools(1);
+        this.tryPlacePools(this.aggro.location.x, this.aggro.location.y, 1);
         this.finalPhasePoolTimer = 3;
       }
     }
@@ -385,10 +384,7 @@ export class SolHeredit extends Mob {
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useSpears && [Attacks.SPEAR]),
       ...(ColosseumSettings.useTriple && canSpecial && this.phaseId >= 3 && [Attacks.TRIPLE_LONG]),
-      ...(ColosseumSettings.useTriple &&
-        canSpecial &&
-        this.phaseId >= 1 &&
-        this.phaseId < 3 && [Attacks.TRIPLE_SHORT]),
+      ...(ColosseumSettings.useTriple && canSpecial && this.phaseId >= 1 && this.phaseId < 3 && [Attacks.TRIPLE_SHORT]),
       ...(ColosseumSettings.useGrapple && canSpecial && this.phaseId >= 2 && [Attacks.GRAPPLE]),
     ];
     if (attackPool.length === 0) {
@@ -705,9 +701,13 @@ export class SolHeredit extends Mob {
     this.freeze(5);
     const lastAggro = this.aggro;
     const { x, y } = this.aggro.location;
-    this.tryPlacePool(x, y);
-    const numOtherPools = toPhase === 5 ? 4 : 5;
-    this.tryPlacePools(numOtherPools);
+    DelayedAction.registerDelayedNpcAction(
+      new DelayedAction(() => {
+        this.tryPlacePool(x, y);
+        const numOtherPools = toPhase === 5 ? 4 : 5;
+        this.tryPlacePools(x, y, numOtherPools);
+      }, 1),
+    );
     this.aggro = null;
     DelayedAction.registerDelayedAction(
       new DelayedAction(() => {
@@ -723,17 +723,13 @@ export class SolHeredit extends Mob {
     return 7;
   }
 
-  private tryPlacePools(amount: number) {
-    if (!this.aggro) {
-      return;
-    }
+  private tryPlacePools(x: number, y: number, amount: number) {
     SoundCache.play(POOL_SPAWN);
     DelayedAction.registerDelayedAction(
       new DelayedAction(() => {
         SoundCache.play(POOL_SHRIEK);
       }, 2),
     );
-    const { x, y } = this.aggro.location;
     for (let i = 0; i < amount; ++i) {
       const xx = _.clamp(
         x - 4 + Math.floor(Random.get() * 9),
@@ -800,12 +796,16 @@ export class SolHeredit extends Mob {
     } else {
       this.laserOrbCooldown = ENRAGE_LASER_ORB_COOLDOWN;
     }
-    DelayedAction.registerDelayedAction(new DelayedAction(() => {
-      SoundCache.play(LASER_CHARGE);
-    }, 3));
-    DelayedAction.registerDelayedAction(new DelayedAction(() => {
-      SoundCache.play(LASER_FIRE);
-    }, 7));
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => {
+        SoundCache.play(LASER_CHARGE);
+      }, 3),
+    );
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => {
+        SoundCache.play(LASER_FIRE);
+      }, 7),
+    );
   }
 
   create3dModel() {
