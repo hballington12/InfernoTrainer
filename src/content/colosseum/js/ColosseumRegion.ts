@@ -200,7 +200,7 @@ export class ColosseumRegion extends Region {
       });
   }
 
-  private enableReplay = true;
+  private enableReplay = false;
   private replayTick = 1;
   override postTick() {
     if (!this.enableReplay || this.world.getReadyTimer > 0) {
