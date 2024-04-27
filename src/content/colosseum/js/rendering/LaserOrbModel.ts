@@ -3,6 +3,7 @@ import { Model } from "../../../../sdk/rendering/Model";
 import { Location } from "../../../../sdk/Location";
 import { Edge, LaserOrb, ORB_SHOOT_DIRECTIONS } from "../entities/LaserOrb";
 import { ColosseumRegion } from "../ColosseumRegion";
+import { ColosseumConstants } from "../Constants";
 
 export class LaserOrbModel implements Model {
   static forLaserOrb(r: LaserOrb) {
@@ -15,7 +16,7 @@ export class LaserOrbModel implements Model {
   private beamGeometry: THREE.CylinderGeometry;
   private beamMaterial: THREE.MeshBasicMaterial;
   private beam: THREE.Mesh;
-  
+
   private projectile: THREE.Mesh;
 
   private outline: THREE.LineSegments;
@@ -48,7 +49,7 @@ export class LaserOrbModel implements Model {
     this.beam.rotation.set(Math.PI / 2, this.getYaw(), 0);
 
     const projectileMaterial = new THREE.MeshBasicMaterial({
-      color: 0xFFFFFF,
+      color: 0xffffff,
       side: THREE.FrontSide,
       transparent: true,
       opacity: 0.75,
@@ -112,9 +113,11 @@ export class LaserOrbModel implements Model {
       if (this.projectile.parent !== scene) {
         scene.add(this.projectile);
       }
-      this.projectile.position.x = this.laserOrb.location.x + ORB_SHOOT_DIRECTIONS[this.laserOrb.edge].x * projectilePct * beamMaxLength + 0.5;
+      this.projectile.position.x =
+        this.laserOrb.location.x + ORB_SHOOT_DIRECTIONS[this.laserOrb.edge].x * projectilePct * beamMaxLength + 0.5;
       this.projectile.position.y = 0;
-      this.projectile.position.z = this.laserOrb.location.y + ORB_SHOOT_DIRECTIONS[this.laserOrb.edge].y * projectilePct * beamMaxLength - 0.5;
+      this.projectile.position.z =
+        this.laserOrb.location.y + ORB_SHOOT_DIRECTIONS[this.laserOrb.edge].y * projectilePct * beamMaxLength - 0.5;
     } else if (this.projectile.parent === scene) {
       scene.remove(this.projectile);
     }
@@ -129,7 +132,7 @@ export class LaserOrbModel implements Model {
       case Edge.NORTH:
         return 0;
       case Edge.EAST:
-        return 3 * Math.PI / 2;
+        return (3 * Math.PI) / 2;
       case Edge.SOUTH:
         return Math.PI;
       case Edge.WEST:
@@ -140,9 +143,9 @@ export class LaserOrbModel implements Model {
   getBeamMaxLength(tickPercent: number): number {
     const arenaLength =
       this.laserOrb.edge === Edge.NORTH || this.laserOrb.edge === Edge.SOUTH
-        ? ColosseumRegion.ARENA_SOUTH - ColosseumRegion.ARENA_NORTH
-        : ColosseumRegion.ARENA_EAST - ColosseumRegion.ARENA_WEST;
-    const beamLength = (arenaLength - 1);
+        ? ColosseumConstants.ARENA_SOUTH - ColosseumConstants.ARENA_NORTH
+        : ColosseumConstants.ARENA_EAST - ColosseumConstants.ARENA_WEST;
+    const beamLength = arenaLength - 1;
     return beamLength;
   }
 
