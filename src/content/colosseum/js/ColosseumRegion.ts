@@ -21,11 +21,6 @@ import { fromHalfFloat } from "three/src/extras/DataUtils";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class ColosseumRegion extends Region {
-  static ARENA_WEST = 19 as const;
-  static ARENA_EAST = 34 as const;
-  static ARENA_NORTH = 18 as const;
-  static ARENA_SOUTH = 33 as const;
-
   wave: number;
   mapImage: HTMLImageElement = ImageLoader.createImage(InfernoMapImage);
 
@@ -167,7 +162,6 @@ export class ColosseumRegion extends Region {
     });
     this.updateSolarFlares();
 
-    
     const creditsButton = document.getElementById("credits_button") as HTMLButtonElement;
     let showCredits = false;
     creditsButton.addEventListener("click", () => {

@@ -1,25 +1,19 @@
 "use strict";
 
-import { InfernoRegion } from "./content/inferno/js/InfernoRegion";
 import { World as World } from "./sdk/World";
 import { Settings } from "./sdk/Settings";
 import { ImageLoader } from "./sdk/utils/ImageLoader";
 import NewRelicBrowser from "new-relic-browser";
 import { Viewport } from "./sdk/Viewport";
-import { filter } from "lodash";
-import { InvisibleMovementBlocker } from "./content/MovementBlocker";
 import { TileMarker } from "./content/TileMarker";
-import { EntityName } from "./sdk/EntityName";
-import { Mob } from "./sdk/Mob";
 import { Location } from "./sdk/Location";
 import { MapController } from "./sdk/MapController";
 import { Assets } from "./sdk/utils/Assets";
 import { Chrome } from "./sdk/Chrome";
-
-import SpecialAttackBarBackground from "./assets/images/attackstyles/interface/special_attack_background.png";
-import { InfernoScene } from "./content/InfernoScene";
 import { Region } from "./sdk/Region";
 import { ColosseumRegion } from "./content/colosseum/js/ColosseumRegion";
+
+import SpecialAttackBarBackground from "./assets/images/attackstyles/interface/special_attack_background.png";
 
 declare global {
   interface Window {
@@ -31,8 +25,8 @@ Settings.readFromStorage();
 
 // Choose the region based on the URL.
 const AVAILABLE_REGIONS = {
-  'inferno.html': new InfernoRegion(),
-  'colosseum.html': new ColosseumRegion(),
+  //'inferno.html': new InfernoRegion(), removed - for bandwidth reasons
+  "colosseum.html": new ColosseumRegion(),
 };
 const DEFAULT_REGION_PATH = 'colosseum.html';
 

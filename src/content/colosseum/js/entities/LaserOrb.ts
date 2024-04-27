@@ -13,6 +13,7 @@ import { Pathing } from "../../../../sdk/Pathing";
 import { Viewport } from "../../../../sdk/Viewport";
 import { Random } from "../../../../sdk/Random";
 import { Projectile } from "../../../../sdk/weapons/Projectile";
+import { ColosseumConstants } from "../Constants";
 
 export enum Edge {
   NORTH,
@@ -26,24 +27,24 @@ export const ORB_SHOOT_DIRECTIONS = {
   [Edge.SOUTH]: { x: 0, y: -1 },
   [Edge.EAST]: { x: -1, y: 0 },
   [Edge.WEST]: { x: 1, y: 0 },
-}
+};
 
 const EDGE_BOUNDARIES: { [edge in Edge]: [Location, Location] } = {
   [Edge.NORTH]: [
-    { x: ColosseumRegion.ARENA_WEST + 2, y: ColosseumRegion.ARENA_NORTH + 1 },
-    { x: ColosseumRegion.ARENA_EAST - 2, y: ColosseumRegion.ARENA_NORTH + 1 },
+    { x: ColosseumConstants.ARENA_WEST + 2, y: ColosseumConstants.ARENA_NORTH + 1 },
+    { x: ColosseumConstants.ARENA_EAST - 2, y: ColosseumConstants.ARENA_NORTH + 1 },
   ],
   [Edge.SOUTH]: [
-    { x: ColosseumRegion.ARENA_WEST + 2, y: ColosseumRegion.ARENA_SOUTH - 1 },
-    { x: ColosseumRegion.ARENA_EAST - 2, y: ColosseumRegion.ARENA_SOUTH - 1 },
+    { x: ColosseumConstants.ARENA_WEST + 2, y: ColosseumConstants.ARENA_SOUTH - 1 },
+    { x: ColosseumConstants.ARENA_EAST - 2, y: ColosseumConstants.ARENA_SOUTH - 1 },
   ],
   [Edge.EAST]: [
-    { x: ColosseumRegion.ARENA_EAST - 1, y: ColosseumRegion.ARENA_NORTH + 2 },
-    { x: ColosseumRegion.ARENA_EAST - 1, y: ColosseumRegion.ARENA_SOUTH - 2 },
+    { x: ColosseumConstants.ARENA_EAST - 1, y: ColosseumConstants.ARENA_NORTH + 2 },
+    { x: ColosseumConstants.ARENA_EAST - 1, y: ColosseumConstants.ARENA_SOUTH - 2 },
   ],
   [Edge.WEST]: [
-    { x: ColosseumRegion.ARENA_WEST + 1, y: ColosseumRegion.ARENA_NORTH + 2 },
-    { x: ColosseumRegion.ARENA_WEST + 1, y: ColosseumRegion.ARENA_SOUTH - 2 },
+    { x: ColosseumConstants.ARENA_WEST + 1, y: ColosseumConstants.ARENA_NORTH + 2 },
+    { x: ColosseumConstants.ARENA_WEST + 1, y: ColosseumConstants.ARENA_SOUTH - 2 },
   ],
 };
 

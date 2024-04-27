@@ -47,6 +47,7 @@ import { ColosseumRegion } from "../ColosseumRegion";
 import { Region } from "../../../../sdk/Region";
 import { Viewport } from "../../../../sdk/Viewport";
 import { Edge, LaserOrb } from "../entities/LaserOrb";
+import { ColosseumConstants } from "../Constants";
 
 enum SolAnimations {
   Idle = 0, // 10874
@@ -733,13 +734,13 @@ export class SolHeredit extends Mob {
     for (let i = 0; i < amount; ++i) {
       const xx = _.clamp(
         x - 4 + Math.floor(Random.get() * 9),
-        ColosseumRegion.ARENA_WEST + 1,
-        ColosseumRegion.ARENA_EAST - 1,
+        ColosseumConstants.ARENA_WEST + 1,
+        ColosseumConstants.ARENA_EAST - 1,
       );
       const yy = _.clamp(
         y - 4 + Math.floor(Random.get() * 9),
-        ColosseumRegion.ARENA_NORTH + 1,
-        ColosseumRegion.ARENA_SOUTH - 1,
+        ColosseumConstants.ARENA_NORTH + 1,
+        ColosseumConstants.ARENA_SOUTH - 1,
       );
       this.tryPlacePool(xx, yy);
     }
