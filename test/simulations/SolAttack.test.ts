@@ -3,9 +3,8 @@ import { World } from "../../src/sdk/World";
 import { Viewport } from "../../src/sdk/Viewport";
 import { TestRegion } from "../utils/TestRegion";
 import { Attacks, SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
-import { FourTickDummyWeapon } from "../../src/content/weapons/FourTickDummyWeapon";
-import { ScytheOfVitur } from "../../src/content/weapons/ScytheOfVitur";
-import { CollisionType } from "../../src/sdk/Collision";
+import { EquipmentControls } from "../../src/sdk/controlpanels/EquipmentControls";
+import { DelayedAction } from "../../src/sdk/DelayedAction";
 
 // sol heredit movement tests
 describe("sol heredit attacks", () => {
@@ -14,7 +13,8 @@ describe("sol heredit attacks", () => {
   let player: Player;
   let boss: SolHeredit;
 
-  beforeEach(() => {
+  const reset = () => {
+    DelayedAction.reset();
     region = new TestRegion(30, 30);
     world = new World();
     region.world = world;
@@ -25,6 +25,10 @@ describe("sol heredit attacks", () => {
     boss.stunned = 0;
     region.addPlayer(player);
     Viewport.viewport.setPlayer(player);
+  };
+
+  beforeEach(() => {
+    reset();
   });
 
   // checking the timing between the attack sequence starting and taking damage
@@ -86,5 +90,165 @@ describe("sol heredit attacks", () => {
       expect(boss.hasLOS).toEqual(true);
       expect(boss.attackDelay).toBeLessThan(0);
     }
+  });
+
+  describe("triple attack tests", () => {
+    beforeEach(() => {
+      reset();
+    });
+
+    test("check triple attack (above 75%) has attack delay of 12", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.forceAttack = Attacks.TRIPLE_SHORT;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(12);
+    });
+
+    test("check triple attack (between 50 and 75%) has attack delay of 11", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.phaseId = 2;
+      boss.forceAttack = Attacks.TRIPLE_SHORT;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(11);
+    });
+
+    test("check triple attack (below 50%) has attack delay of 12", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.phaseId = 3;
+      boss.forceAttack = Attacks.TRIPLE_LONG;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(12);
+    });
+
+    test("check short triple attack (above 50%) is blockable", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.phaseId = 1;
+      boss.forceAttack = Attacks.TRIPLE_SHORT;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(12);
+      world.tickWorld(2);
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+      player.prayerController.findPrayerByName("Protect from Melee").deactivate();
+      world.tickWorld(2);
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+      player.prayerController.findPrayerByName("Protect from Melee").deactivate();
+      world.tickWorld(2);
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+      player.prayerController.findPrayerByName("Protect from Melee").deactivate();
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+    });
+
+    test("check long triple attack (below 50%) is blockable", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.phaseId = 3;
+      boss.forceAttack = Attacks.TRIPLE_LONG;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(12);
+      world.tickWorld(2);
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+      player.prayerController.findPrayerByName("Protect from Melee").deactivate();
+      world.tickWorld(2);
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+      player.prayerController.findPrayerByName("Protect from Melee").deactivate();
+      world.tickWorld(3);
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+      player.prayerController.findPrayerByName("Protect from Melee").deactivate();
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toEqual(99);
+    });
+
+    test("check early melee prayer in triple fails", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.phaseId = 1;
+      boss.forceAttack = Attacks.TRIPLE_SHORT;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(12);
+      world.tickWorld();
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld(2);
+      expect(player.currentStats.hitpoint).toBeLessThan(99);
+    });
+
+    test("check early overhead prayer in triple fails, even with correct melee prayer", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.phaseId = 1;
+      boss.forceAttack = Attacks.TRIPLE_SHORT;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(12);
+      world.tickWorld();
+      player.prayerController.findPrayerByName("Protect from Range").activate(player);
+      world.tickWorld();
+      player.prayerController.findPrayerByName("Protect from Melee").activate(player);
+      world.tickWorld();
+      expect(player.currentStats.hitpoint).toBeLessThan(99);
+    });
+
+    test("check failed triple attack turns off overhead prayer", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.phaseId = 1;
+      boss.forceAttack = Attacks.TRIPLE_SHORT;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(12);
+      world.tickWorld();
+      player.prayerController.findPrayerByName("Protect from Range").activate(player);
+      world.tickWorld(2);
+      expect(player.currentStats.hitpoint).toBeLessThan(99);
+      expect(player.prayerController.findPrayerByName("Protect from Range").isActive).toBeFalsy();
+    });
+  });
+
+  describe("grapple attack tests", () => {
+    beforeEach(() => {
+      new EquipmentControls();
+      reset();
+    });
+    test("check grapple attack has attack delay of 7", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.forceAttack = Attacks.GRAPPLE;
+      world.tickWorld();
+      expect(boss.attackDelay).toEqual(7);
+    });
+
+    test("check grapple attack adds an equipment interaction", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.forceAttack = Attacks.GRAPPLE;
+      expect(EquipmentControls.instance.equipmentInteractions).toHaveLength(1);
+      world.tickWorld();
+      expect(EquipmentControls.instance.equipmentInteractions).toHaveLength(2);
+    });
+
+    test("check grapple attack resets equipment interaction 4 ticks after attack", () => {
+      boss.setAggro(player);
+      region.addMob(boss);
+      boss.forceAttack = Attacks.GRAPPLE;
+      expect(EquipmentControls.instance.equipmentInteractions).toHaveLength(1);
+      world.tickWorld(3);
+      expect(EquipmentControls.instance.equipmentInteractions).toHaveLength(2);
+      world.tickWorld();
+      expect(EquipmentControls.instance.equipmentInteractions).toHaveLength(1);
+    });
   });
 });
