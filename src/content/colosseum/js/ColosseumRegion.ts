@@ -167,6 +167,22 @@ export class ColosseumRegion extends Region {
     });
     this.updateSolarFlares();
 
+    
+    const creditsButton = document.getElementById("credits_button") as HTMLButtonElement;
+    let showCredits = false;
+    creditsButton.addEventListener("click", () => {
+      showCredits = !showCredits;
+      document.getElementById("credits").innerHTML = !showCredits
+        ? ""
+        : `
+      <ul>
+        <li>Jagex</li>
+        <li>Supalosa (engine and logic)</li>
+        <li>Tesla Owner (engine)</li>
+        <li>KiwiIskadda (detailed feedback)</li>
+        <li>Syndra, Varadium, ro0bo, zyth (early feedback and testing)</li>
+      </ul>`;
+    });
     return {
       player: player,
     };
