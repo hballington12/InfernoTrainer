@@ -14,6 +14,11 @@ export class DelayedAction {
     this.identifier = Math.random() * 1000000;
   }
 
+  static reset() {
+    this.delayedActions = [];
+    this.delayedNpcActions = [];
+  }
+
   /**
    * Register a delayed action to be called in the middle of a tick (after npc actions, before player actions).
    * Use this if you need an action that reads from an NPC and writes to a player in the same tick.

@@ -21,12 +21,12 @@ export class EquipmentControls extends BaseControls {
 
   private DEFAULT_EQUIPMENT_INTERACTIONS = [(slot) => this.unequipItem(slot)];
 
-  private equipmentInteractions: ((slot: EquipmentTypes) => void)[] = this.DEFAULT_EQUIPMENT_INTERACTIONS;
-  
+  equipmentInteractions: ((slot: EquipmentTypes) => void)[] = [...this.DEFAULT_EQUIPMENT_INTERACTIONS];
+
   private clickedSlot: EquipmentTypes = null;
 
   resetEquipmentInteractions() {
-    this.equipmentInteractions = this.DEFAULT_EQUIPMENT_INTERACTIONS
+    this.equipmentInteractions = [...this.DEFAULT_EQUIPMENT_INTERACTIONS];
   }
 
   addEquipmentInteraction(interaction: (slot: EquipmentTypes) => void) {
@@ -110,7 +110,15 @@ export class EquipmentControls extends BaseControls {
     return false;
   }
 
-  drawEquipment(context: OffscreenCanvasRenderingContext2D, x: number, y: number, slotX: number, slotY: number, scale: number, slot: EquipmentTypes) {
+  drawEquipment(
+    context: OffscreenCanvasRenderingContext2D,
+    x: number,
+    y: number,
+    slotX: number,
+    slotY: number,
+    scale: number,
+    slot: EquipmentTypes,
+  ) {
     const equipmentSlot = EQUIPMENT_TYPE_TO_SLOT[slot];
     if (Viewport.viewport.player.equipment[equipmentSlot]) {
       context.drawImage(
