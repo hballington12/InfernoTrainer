@@ -167,6 +167,9 @@ export class SolHeredit extends Mob {
 
   stationaryTimer = 0;
 
+  // for instancing of slams
+  tickNumber = 0;
+
   mobName(): EntityName {
     return EntityName.SOL_HEREDIT;
   }
@@ -287,6 +290,7 @@ export class SolHeredit extends Mob {
   }
 
   attackIfPossible() {
+    this.tickNumber++;
     this.laserOrbCooldown--;
     this.overheadHistory.push(!!this.aggro?.prayerController.overhead());
     this.attackStyle = this.attackStyleForNewAttack();
@@ -426,18 +430,21 @@ export class SolHeredit extends Mob {
     if (!this.aggro) {
       return;
     }
-    const midX = (toX - fromX + 1) / 2;
-    const midY = (toY - fromY + 1) / 2;
-    const radius = Math.abs(fromX - toX);
+    console.log('fillRect', fromX, fromY, toX, toY);
+    const midX = Math.floor((toX - fromX) / 2);
+    const midY = Math.floor((toY - fromY) / 2);
+    const radius = (Math.abs(fromX - toX) - 1) / 2 + 1;
     for (let xx = fromX; xx < toX; ++xx) {
       for (let yy = toY; yy > fromY; --yy) {
-        const radX = Math.abs(midX - xx + fromX);
-        const radY = Math.abs(midY - yy + fromY);
+        const radX = Math.abs(fromX + midX - xx);
+        const radY = Math.abs(fromY + midY - yy + 1);
         if ((radX === exceptRadius && radY <= exceptRadius) || (radY === exceptRadius && radX <= exceptRadius)) {
           continue;
         }
+        const delay = Math.max(radX, radY) / radius;
+        console.log('rx', radX, 'ry', radY, 'radius', radius, 'delay', delay);
         this.region.addEntity(
-          new SolGroundSlam(this.region, { x: xx, y: yy }, this, this.aggro, Math.max(radX, radY) / radius),
+          new SolGroundSlam(this.region, { x: xx, y: yy }, this, this.aggro, delay, this.tickNumber),
         );
       }
     }
@@ -458,7 +465,9 @@ export class SolHeredit extends Mob {
     let n = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      this.region.addEntity(new SolGroundSlam(this.region, { x: fromX, y: fromY }, this, this.aggro, n++ / length));
+      const delay = n / length;
+      this.region.addEntity(new SolGroundSlam(this.region, { x: fromX, y: fromY }, this, this.aggro, delay, this.tickNumber));
+      n++;
       if (fromX === toX && fromY === toY) break;
       const e2 = 2 * err;
       if (e2 > -dy) {
@@ -585,11 +594,11 @@ export class SolHeredit extends Mob {
   }
 
   private doFirstShield() {
-    this.fillRect(this.location.x - 8, this.location.y - 12, this.location.x + 11, this.location.y + 7, 4);
+    this.fillRect(this.location.x - 7, this.location.y - 12, this.location.x + 12, this.location.y + 7, 4);
   }
 
   private doSecondShield() {
-    this.fillRect(this.location.x - 8, this.location.y - 12, this.location.x + 11, this.location.y + 7, 5);
+    this.fillRect(this.location.x - 7, this.location.y - 12, this.location.x + 12, this.location.y + 7, 5);
   }
 
   private attackTripleShort() {
