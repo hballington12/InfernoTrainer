@@ -430,7 +430,6 @@ export class SolHeredit extends Mob {
     if (!this.aggro) {
       return;
     }
-    console.log('fillRect', fromX, fromY, toX, toY);
     const midX = Math.floor((toX - fromX) / 2);
     const midY = Math.floor((toY - fromY) / 2);
     const radius = (Math.abs(fromX - toX) - 1) / 2 + 1;
@@ -442,7 +441,6 @@ export class SolHeredit extends Mob {
           continue;
         }
         const delay = Math.max(radX, radY) / radius;
-        console.log('rx', radX, 'ry', radY, 'radius', radius, 'delay', delay);
         this.region.addEntity(
           new SolGroundSlam(this.region, { x: xx, y: yy }, this, this.aggro, delay, this.tickNumber),
         );
