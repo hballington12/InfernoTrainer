@@ -11,6 +11,7 @@ import { Random } from "../../../../sdk/Random";
 import { Region } from "../../../../sdk/Region";
 import { TileMarkerModel } from "../../../../sdk/rendering/TileMarkerModel";
 import { BasicModel } from "../../../../sdk/rendering/BasicModel";
+import { GroundSlamModel } from "../rendering/GroundSlamModel";
 
 class SolGroundSlamWeapon extends Weapon {
   calculateHitDelay(distance: number) {
@@ -41,7 +42,9 @@ export class SolGroundSlam extends Entity {
     location: Location,
     from: Unit,
     to: Unit,
+    // number from 0-1 to delay the visual effect in ticks
     private delay: number | null = 0,
+    private creationTick: number
   ) {
     super(region, location);
     this.from = from;
@@ -49,7 +52,7 @@ export class SolGroundSlam extends Entity {
   }
 
   create3dModel() {
-    return TileMarkerModel.forRenderable(this, false);
+    return GroundSlamModel.forGroundSlam(this, this.creationTick);
   }
 
   get color() {
@@ -75,6 +78,15 @@ export class SolGroundSlam extends Entity {
   visible(tickPercent) {
     // makes the sparks appear to shoot forward
     return this.age + tickPercent >= 1 + this.delay / 3;
+  }
+
+  getScale(tickPercent) {
+    return this.visible(tickPercent) ? 1 - Math.min(1, (this.age - 1 + tickPercent - (this.delay / 3)) / 3): 0;
+  }
+
+  // note: is only called on the first one, should NOT consider delay as the first one is on the top left
+  getAlpha(tickPercent) {
+    return 0.5 - Math.min(1, (this.age - 1 + tickPercent) / 3) * 0.5;
   }
 
   tick() {
