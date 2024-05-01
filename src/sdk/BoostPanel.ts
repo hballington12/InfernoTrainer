@@ -47,7 +47,7 @@ export class BoostPanel {
     const CELL_SIZE = 24;
     const width = scale * CELL_SIZE;
     const height = scale * CELL_SIZE * boostedStats.length;
-    context.fillRect(28 + xLeft, yBottom - height, width, height)
+    context.fillRect(xLeft, yBottom - height, width, height)
     context.globalAlpha = 1;
     let y = yBottom - scale * CELL_SIZE;
     context.font = `${scale * 12}px OSRS`;
@@ -58,19 +58,19 @@ export class BoostPanel {
       const target = player.stats[boostedStat];
       context.drawImage(
         BOOST_IMAGES[boostedStat],
-        28 + xLeft,
+        xLeft,
         y,
         scale * CELL_SIZE,
         scale * CELL_SIZE,
       );
       context.fillStyle = "black";
-      context.fillText(`${current}`, 28 + xLeft + (scale * CELL_SIZE) / 2 + 1, y + (scale * CELL_SIZE) / 2 + 1);
+      context.fillText(`${current}`, xLeft + (scale * CELL_SIZE) / 2 + 1, y + (scale * CELL_SIZE) / 2 + 1);
       if (current < target) {
         context.fillStyle = "red";
       } else {
         context.fillStyle = "lime";
       }
-      context.fillText(`${current}`, 28 + xLeft + (scale * CELL_SIZE) / 2, y + (scale * CELL_SIZE) / 2);
+      context.fillText(`${current}`, xLeft + (scale * CELL_SIZE) / 2, y + (scale * CELL_SIZE) / 2);
       y -= scale * CELL_SIZE;
     }
     context.restore();

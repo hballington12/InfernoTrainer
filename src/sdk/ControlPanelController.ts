@@ -145,7 +145,7 @@ export class ControlPanelController {
       return { x: 15, y: mapHeight + spacer };
     } else {
       return {
-        x: width - 231 * scale - (Settings.menuVisible ? 232 : 0),
+        x: width - 231 * scale - (Settings.menuVisible ? 232 : 0) + 28,
         y: height - 72 * scale,
       };
     }
