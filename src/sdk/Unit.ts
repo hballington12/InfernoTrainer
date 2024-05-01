@@ -31,7 +31,7 @@ import { CollisionType } from "./Collision";
 import { Renderable } from "./Renderable";
 import { Sound, SoundCache } from "./utils/SoundCache";
 import { DelayedAction } from "./DelayedAction";
-import { parseText } from "./utils/Text";
+import { TextSegment, parseText } from "./utils/Text";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum UnitTypes {
@@ -674,21 +674,25 @@ export abstract class Unit extends Renderable {
     this.overheadTextTimer = 8;
   }
 
-  drawOverheadText(context: OffscreenCanvasRenderingContext2D, scale: number) {
+  drawOverheadText(context: OffscreenCanvasRenderingContext2D, scale: number, alignCenter = true, prefix = "") {
     if (!this.overheadText) {
       return;
     }
-    context.font = "24px OSRS";
-    context.fillStyle = "yellow";
     const parsedText = parseText(this.overheadText);
-    const fullText = parsedText.map(({text}) => text).join("");
+    const textParts = prefix ? [{ text: prefix }, ...parsedText] : parsedText;
+    this.drawText(context, textParts, scale, alignCenter, prefix);
+  }
+
+  drawText(context: OffscreenCanvasRenderingContext2D, textParts: TextSegment[], scale: number, alignCenter = true, prefix = "") {
+    context.font = "24px OSRS";
+    const fullText = textParts.map(({text}) => text).join("");
     const fullWidth = context.measureText(fullText);
-    const startX = -(fullWidth.width / 2);
+    const startX = alignCenter ? -(fullWidth.width / 2) : 0;
     context.fillStyle = "black";
     context.fillText(fullText, startX + 1, (-(this.size / 2) * scale) - 10 + 1);
     let x = startX;
-    for (let i = 0; i < parsedText.length; i++) {
-      const { text, color } = parsedText[i];
+    for (let i = 0; i < textParts.length; i++) {
+      const { text, color } = textParts[i];
       context.fillStyle = color ? `#${color}` : "yellow";
       context.fillText(text, x, (-(this.size / 2) * scale) - 10);
       x += context.measureText(text).width;

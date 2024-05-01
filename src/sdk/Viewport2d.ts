@@ -85,8 +85,8 @@ export class Viewport2d implements ViewportDelegate {
       x = viewport.width * Settings.tileSize - offsetX + viewportX * Settings.tileSize;
       y = viewport.height * Settings.tileSize - offsetY + viewportY * Settings.tileSize;
     }
-    let adjustedX = x / Settings.tileSize;
-    let adjustedY = y / Settings.tileSize;
+    const adjustedX = x / Settings.tileSize;
+    const adjustedY = y / Settings.tileSize;
     const mobs: Mob[] = [];
     const players: Player[] = [];
     const groundItems: Item[] = [];
