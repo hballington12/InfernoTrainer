@@ -24,6 +24,7 @@ import { TorvaPlatebody } from "../../equipment/TorvaPlatebody";
 import { TorvaPlatelegs } from "../../equipment/TorvaPlatelegs";
 import { PrimordialBoots } from "../../equipment/PrimordialBoots";
 import { FourTickDummyWeapon } from "../../weapons/FourTickDummyWeapon";
+import { AmuletOfTorture } from "../../equipment/AmuletOfTorture";
 
 export class ColosseumLoadout {
   loadoutType: string;
@@ -38,7 +39,7 @@ export class ColosseumLoadout {
         weapon: new ScytheOfVitur(),
         offhand: null,
         helmet: new TorvaFullhelm(),
-        necklace: new OccultNecklace(), // TODO
+        necklace: new AmuletOfTorture(),
         cape: new InfernalCape(),
         ammo: new DragonArrows(),
         chest: new TorvaPlatebody(),
