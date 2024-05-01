@@ -681,13 +681,17 @@ export abstract class Unit extends Renderable {
     context.font = "24px OSRS";
     context.fillStyle = "yellow";
     const parsedText = parseText(this.overheadText);
-    const fullWidth = context.measureText(parsedText.map(({text}) => text).join(""));
-    let startX = -(fullWidth.width / 2);
+    const fullText = parsedText.map(({text}) => text).join("");
+    const fullWidth = context.measureText(fullText);
+    const startX = -(fullWidth.width / 2);
+    context.fillStyle = "black";
+    context.fillText(fullText, startX + 1, (-(this.size / 2) * scale) - 10 + 1);
+    let x = startX;
     for (let i = 0; i < parsedText.length; i++) {
       const { text, color } = parsedText[i];
       context.fillStyle = color ? `#${color}` : "yellow";
-      context.fillText(text, startX, (-(this.size / 2) * scale) - 10);
-      startX += context.measureText(text).width;
+      context.fillText(text, x, (-(this.size / 2) * scale) - 10);
+      x += context.measureText(text).width;
     }
   }
 
