@@ -125,9 +125,9 @@ export class ScytheOfVitur extends MeleeWeapon {
       const yy = from.location.y + hit[1];
       const collision = Collision.collidesWithAnyMobs(region, xx, yy, from.size);
       multiplier *= 0.5;
-      const extraHitBonuses = {
+      const extraHitBonuses: AttackBonuses = {
         ...bonuses,
-        overallMultipler: multiplier,
+        overallMultiplier: multiplier,
       };
       if (collision) {
         super.attack(from, collision, extraHitBonuses);

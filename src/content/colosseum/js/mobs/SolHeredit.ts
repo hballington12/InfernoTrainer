@@ -618,6 +618,7 @@ export class SolHeredit extends Mob {
   }
 
   private attackGrapple() {
+    this.freeze(5);
     this.firstShield = true;
     this.firstSpear = true;
     this.playAnimation(SolAnimations.Grapple);

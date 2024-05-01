@@ -1,4 +1,4 @@
-import ScytheInventImage from "../../assets/images/weapons/scytheOfVitur.png";
+import BladeOfSaeldorImage from "../../assets/images/weapons/Blade_of_saeldor.png";
 import { MeleeWeapon } from "../../sdk/weapons/MeleeWeapon";
 import { ItemName } from "../../sdk/ItemName";
 import { AttackStyle, AttackStyleTypes } from "../../sdk/AttackStylesController";
@@ -8,28 +8,27 @@ import { Sound } from "../../sdk/utils/SoundCache";
 
 import ScytheAttackSound from "../../assets/sounds/scythe_swing_2524.ogg";
 
-// placeholder for tests, should be claws or blade of saeldor or something
-export class FourTickDummyWeapon extends MeleeWeapon {
+export class BladeOfSaeldor extends MeleeWeapon {
   constructor() {
     super();
 
     this.bonuses = {
       attack: {
-        stab: 70,
-        slash: 125,
-        crush: 30,
-        magic: -6,
+        stab: 55,
+        slash: 94,
+        crush: 0,
+        magic: 0,
         range: 0,
       },
       defence: {
-        stab: -2,
-        slash: 8,
-        crush: 10,
+        stab: 0,
+        slash: 0,
+        crush: 0,
         magic: 0,
         range: 0,
       },
       other: {
-        meleeStrength: 75,
+        meleeStrength: 89,
         rangedStrength: 0,
         magicDamage: 0,
         prayer: 0,
@@ -42,11 +41,11 @@ export class FourTickDummyWeapon extends MeleeWeapon {
   }
 
   attackStyles() {
-    return [AttackStyle.REAP, AttackStyle.AGGRESSIVESLASH, AttackStyle.AGGRESSIVECRUSH, AttackStyle.DEFENSIVE];
+    return [AttackStyle.ACCURATE, AttackStyle.AGGRESSIVESLASH, AttackStyle.STAB, AttackStyle.DEFENSIVE];
   }
 
   attackStyleCategory(): AttackStyleTypes {
-    return AttackStyleTypes.SCYTHE;
+    return AttackStyleTypes.SLASHSWORD;
   }
 
   defaultStyle(): AttackStyle {
@@ -54,11 +53,11 @@ export class FourTickDummyWeapon extends MeleeWeapon {
   }
 
   get itemName(): ItemName {
-    return ItemName.SHARK;
+    return ItemName.BLADE_OF_SAELDOR;
   }
 
   get isTwoHander(): boolean {
-    return true;
+    return false;
   }
 
   hasSpecialAttack(): boolean {
@@ -74,19 +73,20 @@ export class FourTickDummyWeapon extends MeleeWeapon {
   }
 
   get inventoryImage() {
-    return ScytheInventImage;
+    return BladeOfSaeldorImage;
   }
 
+  private Model = Assets.getAssetUrl("models/player_blade_of_saeldor.glb");
   override get model() {
-    return Assets.getAssetUrl("models/player_sanguine_scythe_of_vitur.glb");
+    return this.Model;
   }
 
   override get attackAnimationId() {
-    return PlayerAnimationIndices.ScytheSwing;
+    return PlayerAnimationIndices.SwordSlash;
   }
 
   override get idleAnimationId() {
-    return PlayerAnimationIndices.ScytheIdle;
+    return PlayerAnimationIndices.Idle;
   }
 
   get attackSound() {

@@ -3,7 +3,7 @@ import { World } from "../../src/sdk/World";
 import { Viewport } from "../../src/sdk/Viewport";
 import { TestRegion } from "../utils/TestRegion";
 import { Attacks, SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
-import { FourTickDummyWeapon } from "../../src/content/weapons/FourTickDummyWeapon";
+import { BladeOfSaeldor } from "../../src/content/weapons/BladeOfSaeldor";
 import { ScytheOfVitur } from "../../src/content/weapons/ScytheOfVitur";
 
 // sol heredit 32-tick reproduction of kiwi iskadda's fight in https://www.youtube.com/watch?v=b7Iv7cf-taQ
@@ -12,7 +12,7 @@ describe("sol heredit attacks", () => {
   let world: World;
   let player: Player;
   let boss: SolHeredit;
-  const fourTickWeapon = new FourTickDummyWeapon();
+  const fourTickWeapon = new BladeOfSaeldor();
   const fiveTickWeapon = new ScytheOfVitur();
 
   beforeAll(() => {
@@ -21,10 +21,6 @@ describe("sol heredit attacks", () => {
     region.world = world;
     world.addRegion(region);
     Viewport.setupViewport(region, true);
-    // x is off by 15 (add to both)
-    // y is off by 14
-    const XOFFS = 15;
-    const YOFFS = 14;
     player = new Player(region, { x: 27, y: 29 });
     boss = new SolHeredit(region, { x: 25, y: 24 }, { aggro: player });
     region.addPlayer(player);
