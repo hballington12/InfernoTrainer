@@ -1,4 +1,4 @@
-type TextSegment = {
+export type TextSegment = {
   text: string;
   color?: string;
 };

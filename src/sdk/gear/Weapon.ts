@@ -27,6 +27,8 @@ interface EffectivePrayers {
 export interface AttackBonuses {
   styleBonus?: number;
   isAccurate?: boolean;
+  // aggressive/controlled
+  styleStrengthBonus?: number;
   voidMultiplier?: number;
   gearMeleeMultiplier?: number;
   gearMageMultiplier?: number;

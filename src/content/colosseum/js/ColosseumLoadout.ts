@@ -1,21 +1,9 @@
 import { UnitOptions } from "../../../sdk/Unit";
 
-import { NecklaceOfAnguish } from "../../equipment/NecklaceOfAnguish";
-import { PegasianBoots } from "../../equipment/PegasianBoots";
-import { OccultNecklace } from "../../equipment/OccultNecklace";
 import { RingOfSufferingImbued } from "../../equipment/RingOfSufferingImbued";
 import { DragonArrows } from "../../equipment/DragonArrows";
-import { StaminaPotion } from "../../items/StaminaPotion";
 import { SaradominBrew } from "../../items/SaradominBrew";
 import { SuperRestore } from "../../items/SuperRestore";
-import { ZaryteVambraces } from "../../equipment/ZaryteVambraces";
-import { MasoriMaskF } from "../../equipment/MasoriMaskF";
-import { MasoriBodyF } from "../../equipment/MasoriBodyF";
-import { MasoriChapsF } from "../../equipment/MasoriChapsF";
-import { DizanasQuiver } from "../../equipment/DizanasQuiver";
-import { BastionPotion } from "../../items/BastionPotion";
-
-import { TwistedBow } from "../../weapons/TwistedBow";
 import { Player } from "../../../sdk/Player";
 import { ScytheOfVitur } from "../../weapons/ScytheOfVitur";
 import { TorvaFullhelm } from "../../equipment/TorvaFullhelm";
@@ -23,8 +11,12 @@ import { InfernalCape } from "../../equipment/InfernalCape";
 import { TorvaPlatebody } from "../../equipment/TorvaPlatebody";
 import { TorvaPlatelegs } from "../../equipment/TorvaPlatelegs";
 import { PrimordialBoots } from "../../equipment/PrimordialBoots";
-import { FourTickDummyWeapon } from "../../weapons/FourTickDummyWeapon";
+import { BladeOfSaeldor } from "../../weapons/BladeOfSaeldor";
 import { AmuletOfTorture } from "../../equipment/AmuletOfTorture";
+import { FerociousGloves } from "../../equipment/FerociousGloves";
+import { SuperCombatPotion } from "../../items/SuperCombatPotion";
+import { AvernicDefender } from "../../equipment/AvernicDefender";
+import { UltorRing } from "../../equipment/UltorRing";
 
 export class ColosseumLoadout {
   loadoutType: string;
@@ -45,18 +37,18 @@ export class ColosseumLoadout {
         chest: new TorvaPlatebody(),
         legs: new TorvaPlatelegs(),
         feet: new PrimordialBoots(),
-        gloves: new ZaryteVambraces(), // TODO
-        ring: new RingOfSufferingImbued(), // TODO
+        gloves: new FerociousGloves(),
+        ring: new UltorRing(),
       },
       inventory: [
-        new TwistedBow(),
-        new MasoriBodyF(),
-        new DizanasQuiver(),
-        new PegasianBoots(),
-        new NecklaceOfAnguish(),
-        new MasoriChapsF(),
-        new MasoriMaskF(),
-        new FourTickDummyWeapon(),
+        new BladeOfSaeldor(),
+        new AvernicDefender(),
+        null,
+        null,
+        new SaradominBrew(),
+        new SaradominBrew(),
+        new SuperCombatPotion(),
+        new SuperCombatPotion(),
         new SaradominBrew(),
         new SaradominBrew(),
         new SuperRestore(),
@@ -65,10 +57,10 @@ export class ColosseumLoadout {
         new SaradominBrew(),
         new SuperRestore(),
         new SuperRestore(),
-        new SaradominBrew(),
-        new SaradominBrew(),
-        new SuperRestore(),
-        new SuperRestore(),
+        null,
+        null,
+        null,
+        null,
       ],
     };
   }

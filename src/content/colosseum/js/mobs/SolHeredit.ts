@@ -618,6 +618,7 @@ export class SolHeredit extends Mob {
   }
 
   private attackGrapple() {
+    this.freeze(5);
     this.firstShield = true;
     this.firstSpear = true;
     this.playAnimation(SolAnimations.Grapple);
@@ -941,5 +942,15 @@ export class SolHeredit extends Mob {
 
   override get drawTrueTile() {
     return true;
+  }
+  
+  override drawUILayer(tickPercent, offset, context, scale, hitsplatsAbove) {
+    super.drawUILayer(tickPercent, offset, context, scale, hitsplatsAbove);
+    // draw overhead text on the bottom left to simulate chatbox
+    context.save();
+    context.translate(10, context.canvas.height - 10);
+    this.drawOverheadText(context, scale, false, `${this.mobName()}: `);
+
+    context.restore();
   }
 }
