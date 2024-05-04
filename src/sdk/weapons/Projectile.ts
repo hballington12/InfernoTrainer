@@ -93,6 +93,9 @@ export class Projectile extends Renderable {
   ) {
     super();
     this.attackStyle = attackStyle;
+    if (Number.isNaN(damage)) {
+      throw new Error(`invalid damage value ${damage}`);
+    }
     this.damage = Math.floor(damage);
     if (!targetIsLocation(to) && this.damage > to.currentStats.hitpoint) {
       this.damage = to.currentStats.hitpoint;

@@ -81,6 +81,8 @@ export class MeleeWeapon extends Weapon {
 
     if (from.type === UnitTypes.PLAYER) {
       bonuses.styleStrengthBonus = AttackStylesController.controller.getWeaponStrengthBonus(this.attackStyle());
+    } else {
+      bonuses.styleStrengthBonus = 0;
     }
     return Math.floor(
       (Math.floor(from.currentStats.strength * prayerMultiplier) + bonuses.styleStrengthBonus + 8) * bonuses.voidMultiplier,
