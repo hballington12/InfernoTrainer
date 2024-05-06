@@ -1,25 +1,9 @@
 "use strict";
 
-import { World as World } from "./sdk/World";
-import { Settings } from "./sdk/Settings";
-import { ImageLoader } from "./sdk/utils/ImageLoader";
-import NewRelicBrowser from "new-relic-browser";
-import { Viewport } from "./sdk/Viewport";
-import { TileMarker } from "./content/TileMarker";
-import { Location } from "./sdk/Location";
-import { MapController } from "./sdk/MapController";
-import { Assets } from "./sdk/utils/Assets";
-import { Chrome } from "./sdk/Chrome";
-import { Region } from "./sdk/Region";
+import { World, Settings, ImageLoader, Viewport, TileMarker, Location, MapController, Assets, Chrome, Region } from "@supalosa/oldschool-trainer-sdk";
 import { ColosseumRegion } from "./content/colosseum/js/ColosseumRegion";
 
 import SpecialAttackBarBackground from "./assets/images/attackstyles/interface/special_attack_background.png";
-
-declare global {
-  interface Window {
-    newrelic: typeof NewRelicBrowser;
-  }
-}
 
 Settings.readFromStorage();
 
@@ -150,8 +134,6 @@ function checkStart() {
 }
 
 /// /////////////////////////////////////////////////////////
-
-window.newrelic.addRelease("inferno-trainer", process.env.COMMIT_REF);
 
 // UI disclaimer
 const topHeaderContainer = document.getElementById("disclaimer_panel");

@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { Model } from "../../../../sdk/rendering/Model";
-import { Location } from "../../../../sdk/Location";
-import { Edge, LaserOrb, ORB_SHOOT_DIRECTIONS } from "../entities/LaserOrb";
-import { ColosseumRegion } from "../ColosseumRegion";
+
+import { Model, Location } from "@supalosa/oldschool-trainer-sdk";
+
 import { SolarFlareOrb } from "../entities/SolarFlareOrb";
+
 
 export class SolarFlareModel implements Model {
   static forSolarFlare(r: SolarFlareOrb) {

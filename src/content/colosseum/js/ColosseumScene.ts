@@ -1,11 +1,6 @@
 "use strict";
-import { Entity } from "../../../sdk/Entity";
 
-import { CollisionType } from "../../../sdk/Collision";
-import { Model } from "../../../sdk/rendering/Model";
-import { LineOfSightMask } from "../../../sdk/LineOfSight";
-import { GLTFModel } from "../../../sdk/rendering/GLTFModel";
-import { Assets } from "../../../sdk/utils/Assets";
+import { Assets, Entity, CollisionType, GLTFModel, Model, LineOfSightMask } from "@supalosa/oldschool-trainer-sdk";
 
 const SceneModel = Assets.getAssetUrl("models/colosseum_partial.glb");
 export class ColosseumScene extends Entity {

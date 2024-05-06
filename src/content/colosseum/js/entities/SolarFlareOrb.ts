@@ -2,15 +2,8 @@
 
 import _ from "lodash";
 
-import { Location } from "../../../../sdk/Location";
-import { Entity } from "../../../../sdk/Entity";
-import { CollisionType } from "../../../../sdk/Collision";
-import { LineOfSightMask } from "../../../../sdk/LineOfSight";
-import { Region } from "../../../../sdk/Region";
-import { Pathing } from "../../../../sdk/Pathing";
-import { Viewport } from "../../../../sdk/Viewport";
-import { Random } from "../../../../sdk/Random";
-import { Projectile } from "../../../../sdk/weapons/Projectile";
+import { Entity, Region, CollisionType, LineOfSightMask, Viewport, Random, Projectile, Pathing, Location } from "@supalosa/oldschool-trainer-sdk";
+
 import { SolarFlareModel } from "../rendering/SolarFlareModel";
 
 

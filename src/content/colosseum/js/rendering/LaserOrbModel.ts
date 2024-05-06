@@ -1,8 +1,7 @@
 import * as THREE from "three";
-import { Model } from "../../../../sdk/rendering/Model";
-import { Location } from "../../../../sdk/Location";
+import { Model, Location } from "@supalosa/oldschool-trainer-sdk";
+
 import { Edge, LaserOrb, ORB_SHOOT_DIRECTIONS } from "../entities/LaserOrb";
-import { ColosseumRegion } from "../ColosseumRegion";
 import { ColosseumConstants } from "../Constants";
 
 export class LaserOrbModel implements Model {

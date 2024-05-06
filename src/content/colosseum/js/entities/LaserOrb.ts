@@ -1,18 +1,20 @@
 "use strict";
 
+import {
+  Entity,
+  Region,
+  CollisionType,
+  LineOfSightMask,
+  Viewport,
+  Random,
+  Projectile,
+  Pathing,
+  Location,
+} from "@supalosa/oldschool-trainer-sdk";
+
 import _ from "lodash";
 
-import { Location } from "../../../../sdk/Location";
-import { Entity } from "../../../../sdk/Entity";
-import { CollisionType } from "../../../../sdk/Collision";
-import { LineOfSightMask } from "../../../../sdk/LineOfSight";
-import { Region } from "../../../../sdk/Region";
 import { LaserOrbModel } from "../rendering/LaserOrbModel";
-import { ColosseumRegion } from "../ColosseumRegion";
-import { Pathing } from "../../../../sdk/Pathing";
-import { Viewport } from "../../../../sdk/Viewport";
-import { Random } from "../../../../sdk/Random";
-import { Projectile } from "../../../../sdk/weapons/Projectile";
 import { ColosseumConstants } from "../Constants";
 
 export enum Edge {
@@ -101,13 +103,13 @@ export class LaserOrb extends Entity {
   get showBeam() {
     return this.firingFreeze >= 2 && this.firingFreeze <= 6;
   }
-  
+
   beamPercent(tickPercent) {
-    return _.clamp((6 - this.firingFreeze + tickPercent), 0, 1);
+    return _.clamp(6 - this.firingFreeze + tickPercent, 0, 1);
   }
-  
+
   projectilePercent(tickPercent) {
-    return _.clamp((2 - this.firingFreeze + tickPercent), 0, 1);
+    return _.clamp(2 - this.firingFreeze + tickPercent, 0, 1);
   }
 
   public fire() {
@@ -176,7 +178,6 @@ export class LaserOrb extends Entity {
       return true;
     }
     return false;
-
   }
 
   getPerceivedLocation(tickPercent) {
@@ -184,7 +185,7 @@ export class LaserOrb extends Entity {
     return {
       x: Pathing.linearInterpolation(this.lastLocation.x, this.location.x, percent),
       y: Pathing.linearInterpolation(this.lastLocation.y, this.location.y, percent),
-      z: 0
-    }
+      z: 0,
+    };
   }
 }

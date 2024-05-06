@@ -1,13 +1,11 @@
 "use strict";
 
+import { Region, Viewport, Settings, Player, CardinalDirection, ImageLoader } from "@supalosa/oldschool-trainer-sdk";
+
+
 // TODO
 import InfernoMapImage from "../../../content/inferno/assets/images/map.png";
-import { Player } from "../../../sdk/Player";
 
-import { CardinalDirection, Region } from "../../../sdk/Region";
-import { Settings } from "../../../sdk/Settings";
-import { ImageLoader } from "../../../sdk/utils/ImageLoader";
-import { Viewport } from "../../../sdk/Viewport";
 import { ColosseumLoadout } from "./ColosseumLoadout";
 import { ColosseumScene } from "./ColosseumScene";
 import { Attacks, SolHeredit as SolHeredit } from "./mobs/SolHeredit";
@@ -16,7 +14,6 @@ import SidebarContent from "../sidebar.html";
 import { WallMan } from "./entities/WallMan";
 import { ColosseumSettings } from "./ColosseumSettings";
 import { SolarFlareOrb } from "./entities/SolarFlareOrb";
-import { fromHalfFloat } from "three/src/extras/DataUtils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
