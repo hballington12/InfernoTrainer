@@ -114,9 +114,18 @@ export enum Attacks {
   GRAPPLE = "grapple",
   PHASE_TRANSITION = "phase_transition",
 }
-
+/*
 export const PHASE_TRANSITION_POINTS: [number, string][] = [
   [1500, "Let's start by testing your footwork."],
+  [1350, "Not bad. Let's try something else..."],
+  [1125, "Impressive. Let's see how you handle this..."],
+  [750, "You can't win!"],
+  [375, "Ralos guides my hand!"],
+  [150, "LET'S END THIS!"],
+];*/
+
+export const PHASE_TRANSITION_POINTS: [number, string][] = [
+  [1500, "Mazhar fight the boss already"],
   [1350, "Not bad. Let's try something else..."],
   [1125, "Impressive. Let's see how you handle this..."],
   [750, "You can't win!"],
