@@ -1,10 +1,10 @@
-import { Player } from "../../src/sdk/Player";
-import { World } from "../../src/sdk/World";
-import { Viewport } from "../../src/sdk/Viewport";
-import { TestRegion } from "../utils/TestRegion";
-import { Attacks, SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
-import { BladeOfSaeldor } from "../../src/content/weapons/BladeOfSaeldor";
-import { ScytheOfVitur } from "../../src/content/weapons/ScytheOfVitur";
+import { Player } from "../../../sdk/Player";
+import { World } from "../../../sdk/World";
+import { Viewport } from "../../../sdk/Viewport";
+import { TestRegion } from "../../../../test/utils/TestRegion";
+import { Attacks, SolHeredit } from "../js/mobs/SolHeredit";
+import { BladeOfSaeldor } from "../../weapons/BladeOfSaeldor";
+import { ScytheOfVitur } from "../../weapons/ScytheOfVitur";
 
 // sol heredit 32-tick reproduction of kiwi iskadda's fight in https://www.youtube.com/watch?v=b7Iv7cf-taQ
 describe("sol heredit attacks", () => {

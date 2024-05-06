@@ -1,8 +1,8 @@
-import { Player } from "../../src/sdk/Player";
-import { World } from "../../src/sdk/World";
-import { Viewport } from "../../src/sdk/Viewport";
-import { TestRegion } from "../utils/TestRegion";
-import { SolHeredit } from "../../src/content/colosseum/js/mobs/SolHeredit";
+import { Player } from "../../../sdk/Player";
+import { World } from "../../../sdk/World";
+import { Viewport } from "../../../sdk/Viewport";
+import { TestRegion } from "../../../../test/utils/TestRegion";
+import { SolHeredit } from "../js/mobs/SolHeredit";
 
 // sol heredit movement tests
 describe("sol heredit movement", () => {
