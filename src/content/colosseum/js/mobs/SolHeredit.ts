@@ -2,16 +2,7 @@
 
 import _ from "lodash";
 
-import { Assets, DelayedAction, EquipmentControls, GLTFModel, Collision, Region, Viewport, Location } from "@supalosa/oldschool-trainer-sdk";
-
-import { EquipmentTypes } from "@supalosa/oldschool-trainer-sdk/src/sdk/Equipment";
-import { Mob, AttackIndicators } from "@supalosa/oldschool-trainer-sdk/src/sdk/Mob";
-import { Pathing } from "@supalosa/oldschool-trainer-sdk/src/sdk/Pathing";
-import { Random } from "@supalosa/oldschool-trainer-sdk/src/sdk/Random";
-import { UnitBonuses } from "@supalosa/oldschool-trainer-sdk/src/sdk/Unit";
-import { Sound, SoundCache } from "@supalosa/oldschool-trainer-sdk/src/sdk/utils/SoundCache";
-import { MeleeWeapon } from "@supalosa/oldschool-trainer-sdk/src/sdk/weapons/MeleeWeapon";
-import { Projectile } from "@supalosa/oldschool-trainer-sdk/src/sdk/weapons/Projectile";
+import { Assets, DelayedAction, EquipmentControls, GLTFModel, Collision, Region, Viewport, Location, EquipmentTypes, AttackIndicators, Mob, Pathing, Random, UnitBonuses, MeleeWeapon, Projectile, Sound, SoundCache } from "@supalosa/oldschool-trainer-sdk";
 
 import { SolGroundSlam } from "../entities/SolGroundSlam";
 import { RingBuffer } from "../utils/RingBuffer";
