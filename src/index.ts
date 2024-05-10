@@ -1,9 +1,9 @@
 "use strict";
 
-import { World, Settings, ImageLoader, Viewport, TileMarker, Location, MapController, Assets, Chrome, Region } from "@supalosa/oldschool-trainer-sdk";
+import { World, Settings, ImageLoader, Viewport, TileMarker, Location, MapController, Assets, Chrome, Region, Trainer } from "@supalosa/oldschool-trainer-sdk";
 import { ColosseumRegion } from "./content/colosseum/js/ColosseumRegion";
 
-import SpecialAttackBarBackground from "./assets/images/attackstyles/interface/special_attack_background.png";
+const SpecialAttackBarBackground = Assets.getAssetUrl("/assets/images/attackstyles/interface/special_attack_background.png");
 
 Settings.readFromStorage();
 
@@ -59,7 +59,7 @@ player.destinationLocation = player.location;
 // UI controls
 
 ImageLoader.onAllImagesLoaded(() =>
-  MapController.controller.updateOrbsMask(Viewport.viewport.player.currentStats, Viewport.viewport.player.stats),
+  MapController.controller.updateOrbsMask(Trainer.player.currentStats, Trainer.player.stats),
 );
 
 ImageLoader.onAllImagesLoaded(() => {

@@ -2,7 +2,7 @@
 
 import _ from "lodash";
 
-import { Entity, Region, CollisionType, LineOfSightMask, Viewport, Random, Projectile, Pathing, Location } from "@supalosa/oldschool-trainer-sdk";
+import { Entity, Region, CollisionType, LineOfSightMask, Viewport, Random, Projectile, Pathing, Location, Trainer } from "@supalosa/oldschool-trainer-sdk";
 
 import { SolarFlareModel } from "../rendering/SolarFlareModel";
 
@@ -70,7 +70,7 @@ export class SolarFlareOrb extends Entity {
   }
 
   tick() {
-    const player = Viewport.viewport.player;
+    const player = Trainer.player;
     if (this.waitTicks <= 0 && this.moveTick <= 0) {
       this.lastLocation = {
         x: this.location.x,

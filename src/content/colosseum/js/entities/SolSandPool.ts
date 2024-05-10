@@ -13,6 +13,7 @@ import {
   Unit,
   Random,
   Location,
+  Trainer,
 } from "@supalosa/oldschool-trainer-sdk";
 
 import { SandPoolModel } from "../rendering/SandPoolModel";
@@ -74,7 +75,7 @@ export class SolSandPool extends Entity {
   tick() {
     ++this.age;
     // sand pools can damage after 3 ticks
-    const player = Viewport.viewport.player;
+    const player = Trainer.player;
     if (player.dying >= 0) {
       return;
     }

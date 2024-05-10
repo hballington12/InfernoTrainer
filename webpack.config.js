@@ -42,8 +42,6 @@ const config = {
           to: "webappicon.png",
           context: `src/`,
         },
-        { from: `assets/fonts/*.woff`, to: "", context: `src/` },
-        { from: `assets/fonts/*.woff2`, to: "", context: `src/` },
       ],
     }),
     new webpack.EnvironmentPlugin(["COMMIT_REF", "BUILD_DATE", "DEPLOY_URL"]),

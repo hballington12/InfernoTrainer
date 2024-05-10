@@ -2,7 +2,7 @@
 
 import _ from "lodash";
 
-import { Assets, DelayedAction, EquipmentControls, GLTFModel, Collision, Region, Viewport, Location, EquipmentTypes, AttackIndicators, Mob, Pathing, Random, UnitBonuses, MeleeWeapon, Projectile, Sound, SoundCache } from "@supalosa/oldschool-trainer-sdk";
+import { Assets, DelayedAction, EquipmentControls, GLTFModel, Collision, Region, Viewport, Location, EquipmentTypes, AttackIndicators, Mob, Pathing, Random, UnitBonuses, MeleeWeapon, Projectile, Sound, SoundCache, Trainer } from "@supalosa/oldschool-trainer-sdk";
 
 import { SolGroundSlam } from "../entities/SolGroundSlam";
 import { RingBuffer } from "../utils/RingBuffer";
@@ -232,7 +232,7 @@ export class SolHeredit extends Mob {
           { text: " hp ", fillStyle: "white" },
         ],
         action: () => {
-          Viewport.viewport.clickController.redClick();
+          Trainer.clickController.redClick();
           this.phaseId = idx;
           this.currentStats.hitpoint = hp;
         },

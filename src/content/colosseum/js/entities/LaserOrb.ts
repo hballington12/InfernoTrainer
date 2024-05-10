@@ -10,6 +10,7 @@ import {
   Projectile,
   Pathing,
   Location,
+  Trainer,
 } from "@supalosa/oldschool-trainer-sdk";
 
 import _ from "lodash";
@@ -158,7 +159,7 @@ export class LaserOrb extends Entity {
       this.moveTick = 2;
     }
     if (this.firingFreeze === 3) {
-      const player = Viewport.viewport.player;
+      const player = Trainer.player;
       if (this.isInLineWithPlayer()) {
         const damage = 60 + Math.floor(Random.get() * 20);
         player.addProjectile(new Projectile(null, damage, player, player, "typeless", { setDelay: 0 }));
@@ -170,7 +171,7 @@ export class LaserOrb extends Entity {
   }
 
   isInLineWithPlayer() {
-    const player = Viewport.viewport.player;
+    const player = Trainer.player;
     if ((this.edge === Edge.NORTH || this.edge === Edge.SOUTH) && player.location.x === this.location.x) {
       return true;
     }
