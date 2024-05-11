@@ -1,16 +1,22 @@
 "use strict";
 
-import { Unit } from "../../../../sdk/Unit";
-import { Projectile, ProjectileOptions } from "../../../../sdk/weapons/Projectile";
-import { Location } from "../../../../sdk/Location";
-import { Entity } from "../../../../sdk/Entity";
-import { CollisionType } from "../../../../sdk/Collision";
-import { Weapon, AttackBonuses } from "../../../../sdk/gear/Weapon";
-import { LineOfSightMask } from "../../../../sdk/LineOfSight";
-import { Random } from "../../../../sdk/Random";
-import { Region } from "../../../../sdk/Region";
+import {
+  Entity,
+  Region,
+  CollisionType,
+  LineOfSightMask,
+  Viewport,
+  ProjectileOptions,
+  AttackBonuses,
+  Projectile,
+  Weapon,
+  Unit,
+  Random,
+  Location,
+  Trainer,
+} from "@supalosa/oldschool-trainer-sdk";
+
 import { SandPoolModel } from "../rendering/SandPoolModel";
-import { Viewport } from "../../../../sdk/Viewport";
 
 class SolPoolBurnWeapon extends Weapon {
   calculateHitDelay(distance: number) {
@@ -34,11 +40,7 @@ export class SolSandPool extends Entity {
 
   age = 0;
 
-
-  constructor(
-    region: Region,
-    location: Location,
-  ) {
+  constructor(region: Region, location: Location) {
     super(region, location);
   }
 
@@ -73,7 +75,7 @@ export class SolSandPool extends Entity {
   tick() {
     ++this.age;
     // sand pools can damage after 3 ticks
-    const player = Viewport.viewport.player;
+    const player = Trainer.player;
     if (player.dying >= 0) {
       return;
     }

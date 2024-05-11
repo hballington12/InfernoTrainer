@@ -1,31 +1,14 @@
 "use strict";
 
-import { World as World } from "./sdk/World";
-import { Settings } from "./sdk/Settings";
-import { ImageLoader } from "./sdk/utils/ImageLoader";
-import NewRelicBrowser from "new-relic-browser";
-import { Viewport } from "./sdk/Viewport";
-import { TileMarker } from "./content/TileMarker";
-import { Location } from "./sdk/Location";
-import { MapController } from "./sdk/MapController";
-import { Assets } from "./sdk/utils/Assets";
-import { Chrome } from "./sdk/Chrome";
-import { Region } from "./sdk/Region";
+import { World, Settings, ImageLoader, Viewport, TileMarker, Location, MapController, Assets, Chrome, Region, Trainer } from "@supalosa/oldschool-trainer-sdk";
 import { ColosseumRegion } from "./content/colosseum/js/ColosseumRegion";
 
-import SpecialAttackBarBackground from "./assets/images/attackstyles/interface/special_attack_background.png";
-
-declare global {
-  interface Window {
-    newrelic: typeof NewRelicBrowser;
-  }
-}
+const SpecialAttackBarBackground = Assets.getAssetUrl("/assets/images/attackstyles/interface/special_attack_background.png");
 
 Settings.readFromStorage();
 
 // Choose the region based on the URL.
 const AVAILABLE_REGIONS = {
-  //'inferno.html': new InfernoRegion(), removed - for bandwidth reasons
   "colosseum.html": new ColosseumRegion(),
 };
 const DEFAULT_REGION_PATH = 'colosseum.html';
@@ -75,7 +58,7 @@ player.destinationLocation = player.location;
 // UI controls
 
 ImageLoader.onAllImagesLoaded(() =>
-  MapController.controller.updateOrbsMask(Viewport.viewport.player.currentStats, Viewport.viewport.player.stats),
+  MapController.controller.updateOrbsMask(Trainer.player.currentStats, Trainer.player.stats),
 );
 
 ImageLoader.onAllImagesLoaded(() => {
@@ -150,8 +133,6 @@ function checkStart() {
 }
 
 /// /////////////////////////////////////////////////////////
-
-window.newrelic.addRelease("inferno-trainer", process.env.COMMIT_REF);
 
 // UI disclaimer
 const topHeaderContainer = document.getElementById("disclaimer_panel");

@@ -1,6 +1,7 @@
 import * as THREE from "three";
-import { Model } from "../../../../sdk/rendering/Model";
-import { Location } from "../../../../sdk/Location";
+
+import { Model, Location } from "@supalosa/oldschool-trainer-sdk";
+
 import { SolGroundSlam } from "../entities/SolGroundSlam";
 
 const MAX_SLAMS_PER_TICK = 400;

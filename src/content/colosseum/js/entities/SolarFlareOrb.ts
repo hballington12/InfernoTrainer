@@ -2,15 +2,8 @@
 
 import _ from "lodash";
 
-import { Location } from "../../../../sdk/Location";
-import { Entity } from "../../../../sdk/Entity";
-import { CollisionType } from "../../../../sdk/Collision";
-import { LineOfSightMask } from "../../../../sdk/LineOfSight";
-import { Region } from "../../../../sdk/Region";
-import { Pathing } from "../../../../sdk/Pathing";
-import { Viewport } from "../../../../sdk/Viewport";
-import { Random } from "../../../../sdk/Random";
-import { Projectile } from "../../../../sdk/weapons/Projectile";
+import { Entity, Region, CollisionType, LineOfSightMask, Random, Projectile, Pathing, Location, Trainer } from "@supalosa/oldschool-trainer-sdk";
+
 import { SolarFlareModel } from "../rendering/SolarFlareModel";
 
 
@@ -77,7 +70,7 @@ export class SolarFlareOrb extends Entity {
   }
 
   tick() {
-    const player = Viewport.viewport.player;
+    const player = Trainer.player;
     if (this.waitTicks <= 0 && this.moveTick <= 0) {
       this.lastLocation = {
         x: this.location.x,

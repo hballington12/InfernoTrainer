@@ -1,10 +1,8 @@
-import { Player } from "../../../sdk/Player";
-import { World } from "../../../sdk/World";
-import { Viewport } from "../../../sdk/Viewport";
-import { TestRegion } from "../../../../test/utils/TestRegion";
+import "../../../../test/setupFiles";
+
+import { DelayedAction, EquipmentControls, Player, Settings, TestRegion, Viewport, World } from "@supalosa/oldschool-trainer-sdk";
 import { Attacks, SolHeredit } from "../js/mobs/SolHeredit";
-import { EquipmentControls } from "../../../sdk/controlpanels/EquipmentControls";
-import { DelayedAction } from "../../../sdk/DelayedAction";
+
 
 // sol heredit movement tests
 describe("sol heredit attacks", () => {
@@ -14,6 +12,7 @@ describe("sol heredit attacks", () => {
   let boss: SolHeredit;
 
   const reset = () => {
+    Settings.inputDelay = 0;
     DelayedAction.reset();
     region = new TestRegion(30, 30);
     world = new World();

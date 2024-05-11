@@ -1,6 +1,7 @@
 import * as THREE from "three";
-import { Model } from "../../../../sdk/rendering/Model";
-import { Location } from "../../../../sdk/Location";
+
+import { Model, Location } from "@supalosa/oldschool-trainer-sdk";
+
 import { SolSandPool } from "../entities/SolSandPool";
 
 const BEAM_HEIGHT = 5;

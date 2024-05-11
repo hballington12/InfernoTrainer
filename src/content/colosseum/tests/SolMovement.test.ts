@@ -1,7 +1,6 @@
-import { Player } from "../../../sdk/Player";
-import { World } from "../../../sdk/World";
-import { Viewport } from "../../../sdk/Viewport";
-import { TestRegion } from "../../../../test/utils/TestRegion";
+import "../../../../test/setupFiles";
+
+import { Player, World, Viewport, TestRegion } from "@supalosa/oldschool-trainer-sdk";
 import { SolHeredit } from "../js/mobs/SolHeredit";
 
 // sol heredit movement tests

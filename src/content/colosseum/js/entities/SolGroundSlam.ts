@@ -1,16 +1,7 @@
 "use strict";
 
-import { Unit } from "../../../../sdk/Unit";
-import { Projectile, ProjectileOptions } from "../../../../sdk/weapons/Projectile";
-import { Location } from "../../../../sdk/Location";
-import { Entity } from "../../../../sdk/Entity";
-import { CollisionType } from "../../../../sdk/Collision";
-import { Weapon, AttackBonuses } from "../../../../sdk/gear/Weapon";
-import { LineOfSightMask } from "../../../../sdk/LineOfSight";
-import { Random } from "../../../../sdk/Random";
-import { Region } from "../../../../sdk/Region";
-import { TileMarkerModel } from "../../../../sdk/rendering/TileMarkerModel";
-import { BasicModel } from "../../../../sdk/rendering/BasicModel";
+import { Weapon, Unit, AttackBonuses, ProjectileOptions, Random, Projectile, Entity, Region, CollisionType, LineOfSightMask, Location } from "@supalosa/oldschool-trainer-sdk";
+
 import { GroundSlamModel } from "../rendering/GroundSlamModel";
 
 class SolGroundSlamWeapon extends Weapon {

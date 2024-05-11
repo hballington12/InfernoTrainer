@@ -1,13 +1,10 @@
 "use strict";
 
-// TODO
-import InfernoMapImage from "../../../content/inferno/assets/images/map.png";
-import { Player } from "../../../sdk/Player";
+import { Region, Viewport, Settings, Player, CardinalDirection, ImageLoader, Trainer } from "@supalosa/oldschool-trainer-sdk";
 
-import { CardinalDirection, Region } from "../../../sdk/Region";
-import { Settings } from "../../../sdk/Settings";
-import { ImageLoader } from "../../../sdk/utils/ImageLoader";
-import { Viewport } from "../../../sdk/Viewport";
+
+import ColosseumMapImage from "../assets/images/map.png";
+
 import { ColosseumLoadout } from "./ColosseumLoadout";
 import { ColosseumScene } from "./ColosseumScene";
 import { Attacks, SolHeredit as SolHeredit } from "./mobs/SolHeredit";
@@ -16,13 +13,12 @@ import SidebarContent from "../sidebar.html";
 import { WallMan } from "./entities/WallMan";
 import { ColosseumSettings } from "./ColosseumSettings";
 import { SolarFlareOrb } from "./entities/SolarFlareOrb";
-import { fromHalfFloat } from "three/src/extras/DataUtils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class ColosseumRegion extends Region {
   wave: number;
-  mapImage: HTMLImageElement = ImageLoader.createImage(InfernoMapImage);
+  mapImage: HTMLImageElement = ImageLoader.createImage(ColosseumMapImage);
 
   get initialFacing() {
     return CardinalDirection.NORTH;
@@ -52,10 +48,10 @@ export class ColosseumRegion extends Region {
           { text: "Mager", fillStyle: "red" },
         ],
         action: () => {
-          Viewport.viewport.clickController.yellowClick();
+          Trainer.clickController.yellowClick();
           const x = Viewport.viewport.contextMenu.destinationLocation.x;
           const y = Viewport.viewport.contextMenu.destinationLocation.y;
-          const mob = new SolHeredit(this, { x, y }, { aggro: Viewport.viewport.player });
+          const mob = new SolHeredit(this, { x, y }, { aggro: Trainer.player });
           mob.removableWithRightClick = true;
           this.addMob(mob);
         },

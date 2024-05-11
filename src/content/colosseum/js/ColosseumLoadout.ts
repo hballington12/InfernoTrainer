@@ -1,22 +1,6 @@
-import { UnitOptions } from "../../../sdk/Unit";
-
-import { RingOfSufferingImbued } from "../../equipment/RingOfSufferingImbued";
-import { DragonArrows } from "../../equipment/DragonArrows";
-import { SaradominBrew } from "../../items/SaradominBrew";
-import { SuperRestore } from "../../items/SuperRestore";
-import { Player } from "../../../sdk/Player";
-import { ScytheOfVitur } from "../../weapons/ScytheOfVitur";
-import { TorvaFullhelm } from "../../equipment/TorvaFullhelm";
-import { InfernalCape } from "../../equipment/InfernalCape";
-import { TorvaPlatebody } from "../../equipment/TorvaPlatebody";
-import { TorvaPlatelegs } from "../../equipment/TorvaPlatelegs";
-import { PrimordialBoots } from "../../equipment/PrimordialBoots";
-import { BladeOfSaeldor } from "../../weapons/BladeOfSaeldor";
-import { AmuletOfTorture } from "../../equipment/AmuletOfTorture";
-import { FerociousGloves } from "../../equipment/FerociousGloves";
-import { SuperCombatPotion } from "../../items/SuperCombatPotion";
-import { AvernicDefender } from "../../equipment/AvernicDefender";
-import { UltorRing } from "../../equipment/UltorRing";
+import { TorvaFullhelm, AmuletOfTorture, InfernalCape, DragonArrows, TorvaPlatebody, TorvaPlatelegs, PrimordialBoots, FerociousGloves, UltorRing, AvernicDefender, SuperCombatPotion, UnitOptions } from "@supalosa/oldschool-trainer-sdk";
+import { SaradominBrew, SuperRestore } from "@supalosa/oldschool-trainer-sdk";
+import { ScytheOfVitur, BladeOfSaeldor, Player } from "@supalosa/oldschool-trainer-sdk";
 
 export class ColosseumLoadout {
   loadoutType: string;

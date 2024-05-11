@@ -1,7 +1,6 @@
 "use strict"
 
-import { TileMarkerModel } from "../../../../sdk/rendering/TileMarkerModel";
-import { InvisibleMovementBlocker } from "../../../MovementBlocker";
+import { InvisibleMovementBlocker, TileMarkerModel } from "@supalosa/oldschool-trainer-sdk";
 
 export class WallMan extends InvisibleMovementBlocker {
 

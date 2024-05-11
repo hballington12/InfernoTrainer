@@ -2,26 +2,11 @@
 
 import _ from "lodash";
 
-import { MeleeWeapon } from "../../../../sdk/weapons/MeleeWeapon";
-import { Mob, AttackIndicators } from "../../../../sdk/Mob";
-import { UnitBonuses } from "../../../../sdk/Unit";
-import { Collision } from "../../../../sdk/Collision";
-import { EntityName } from "../../../../sdk/EntityName";
-import { Projectile } from "../../../../sdk/weapons/Projectile";
-import { Sound, SoundCache } from "../../../../sdk/utils/SoundCache";
-import { Location } from "../../../../sdk/Location";
-import { GLTFModel } from "../../../../sdk/rendering/GLTFModel";
-import { Assets } from "../../../../sdk/utils/Assets";
-import { Random } from "../../../../sdk/Random";
-import { DelayedAction } from "../../../../sdk/DelayedAction";
+import { Assets, DelayedAction, EquipmentControls, GLTFModel, Collision, Region, Viewport, Location, EquipmentTypes, AttackIndicators, Mob, Pathing, Random, UnitBonuses, MeleeWeapon, Projectile, Sound, SoundCache, Trainer } from "@supalosa/oldschool-trainer-sdk";
+
 import { SolGroundSlam } from "../entities/SolGroundSlam";
 import { RingBuffer } from "../utils/RingBuffer";
 import { ColosseumSettings } from "../ColosseumSettings";
-import { Pathing } from "../../../../sdk/Pathing";
-import { EquipmentControls } from "../../../../sdk/controlpanels/EquipmentControls";
-import { EquipmentTypes } from "../../../../sdk/Equipment";
-
-export const SolHereditModel = Assets.getAssetUrl("models/sol2.glb");
 
 import SpearStart from "../../assets/sounds/8147_spear.ogg";
 import SpearEnd from "../../assets/sounds/8047_spear_swing.ogg";
@@ -43,11 +28,10 @@ import LaserCharge from "../../assets/sounds/8253_laser.ogg";
 import LaserFire from "../../assets/sounds/8230_laser_fire.ogg";
 
 import { SolSandPool } from "../entities/SolSandPool";
-import { ColosseumRegion } from "../ColosseumRegion";
-import { Region } from "../../../../sdk/Region";
-import { Viewport } from "../../../../sdk/Viewport";
 import { Edge, LaserOrb } from "../entities/LaserOrb";
 import { ColosseumConstants } from "../Constants";
+
+export const SolHereditModel = Assets.getAssetUrl("models/sol2.glb");
 
 enum SolAnimations {
   Idle = 0, // 10874
@@ -170,8 +154,8 @@ export class SolHeredit extends Mob {
   // for instancing of slams
   tickNumber = 0;
 
-  mobName(): EntityName {
-    return EntityName.SOL_HEREDIT;
+  mobName() {
+    return "Sol Heredit";
   }
 
   shouldChangeAggro(projectile: Projectile) {
@@ -248,7 +232,7 @@ export class SolHeredit extends Mob {
           { text: " hp ", fillStyle: "white" },
         ],
         action: () => {
-          Viewport.viewport.clickController.redClick();
+          Trainer.clickController.redClick();
           this.phaseId = idx;
           this.currentStats.hitpoint = hp;
         },

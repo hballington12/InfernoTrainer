@@ -15,5 +15,6 @@ module.exports = {
       "<rootDir>/test/__mocks__/assetMock.js",
     "\\.(css|less)$": "<rootDir>/test/__mocks__/cssMock.js",
     three: require.resolve("three"),
+    //"@supalosa/oldschool-trainer-sdk": require.resolve("@supalosa/oldschool-trainer-sdk"),
   },
 };
