@@ -1,3 +1,5 @@
+import "../../../../test/setupFiles";
+
 import { BladeOfSaeldor, Player, ScytheOfVitur, TestRegion, Viewport, World } from "@supalosa/oldschool-trainer-sdk";
 
 import { Attacks, SolHeredit } from "../js/mobs/SolHeredit";

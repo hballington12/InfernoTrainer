@@ -1,3 +1,5 @@
+import "../../../../test/setupFiles";
+
 import { Player, World, Viewport, TestRegion } from "@supalosa/oldschool-trainer-sdk";
 import { SolHeredit } from "../js/mobs/SolHeredit";
 

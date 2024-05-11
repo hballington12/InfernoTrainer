@@ -1,5 +1,8 @@
+import "../../../../test/setupFiles";
+
 import { DelayedAction, EquipmentControls, Player, Settings, TestRegion, Viewport, World } from "@supalosa/oldschool-trainer-sdk";
 import { Attacks, SolHeredit } from "../js/mobs/SolHeredit";
+
 
 // sol heredit movement tests
 describe("sol heredit attacks", () => {

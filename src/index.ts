@@ -9,7 +9,6 @@ Settings.readFromStorage();
 
 // Choose the region based on the URL.
 const AVAILABLE_REGIONS = {
-  //'inferno.html': new InfernoRegion(), removed - for bandwidth reasons
   "colosseum.html": new ColosseumRegion(),
 };
 const DEFAULT_REGION_PATH = 'colosseum.html';
