@@ -19,8 +19,6 @@ global.fetch = jest.fn().mockImplementation(() => ({
   arrayBuffer: () => null,
 }));
 
-import { Random, Settings } from "@supalosa/oldschool-trainer-sdk";
-
 jest.mock("@supalosa/oldschool-trainer-sdk", () => {
   const originalModule = jest.requireActual<typeof import("@supalosa/oldschool-trainer-sdk")>(
     "@supalosa/oldschool-trainer-sdk",
@@ -64,8 +62,8 @@ jest.spyOn(document, "getElementById").mockImplementation((elementId: string) =>
   return c;
 });
 
+/*
 const nextRandom = [];
-
 Random.setRandom(() => {
   if (nextRandom.length > 0) {
     return nextRandom.shift();
@@ -75,3 +73,4 @@ Random.setRandom(() => {
 });
 
 Settings.readFromStorage();
+*/

@@ -1,6 +1,6 @@
 "use strict";
 
-import { World, Settings, ImageLoader, Viewport, TileMarker, Location, MapController, Assets, Chrome, Region, Trainer } from "@supalosa/oldschool-trainer-sdk";
+import { World, Settings, ImageLoader, Viewport, TileMarker, Location, MapController, Assets, Chrome, Region, Trainer, ControlPanelController } from "@supalosa/oldschool-trainer-sdk";
 import { ColosseumRegion } from "./content/colosseum/js/ColosseumRegion";
 
 const SpecialAttackBarBackground = Assets.getAssetUrl("/assets/images/attackstyles/interface/special_attack_background.png");
@@ -25,13 +25,17 @@ world.addRegion(selectedRegion);
 // Initialise UI
 document.getElementById('sidebar_content').innerHTML = selectedRegion.getSidebarContent();
 
-const use3dViewCheckbox = document.getElementById("use3dView") as HTMLInputElement;
-use3dViewCheckbox.checked = Settings.use3dView;
-use3dViewCheckbox.addEventListener("change", () => {
-  Settings.use3dView = use3dViewCheckbox.checked;
-  Settings.persistToStorage();
-  window.location.reload();
+document.getElementById("settings").addEventListener("click", () => {
+  ControlPanelController.controller.setActiveControl('SETTINGS');
 });
+
+const tileMarkerColor = document.getElementById("tileMarkerColor") as HTMLInputElement;
+tileMarkerColor.addEventListener("input", () => {
+  Settings.tileMarkerColor = tileMarkerColor.value;
+  TileMarker.onSetColor(Settings.tileMarkerColor);
+  Settings.persistToStorage();
+}, false);
+tileMarkerColor.value = Settings.tileMarkerColor;
 
 const { player } = selectedRegion.initialiseRegion();
 

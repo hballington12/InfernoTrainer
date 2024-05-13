@@ -9,6 +9,6 @@ export class WallMan extends InvisibleMovementBlocker {
     }
 
     override create3dModel() {
-        return TileMarkerModel.forRenderable(this, false);
+        return TileMarkerModel.forRenderable(this, null);
     }
 }

@@ -34,9 +34,10 @@ export class ColosseumScene extends Entity {
 
   create3dModel(): Model {
     // one day we'll figure out the offsets used in the exporter...
-    return new GLTFModel(this, [SceneModel], 1, -11.2, {
+    return new GLTFModel(this, [SceneModel], { scale: 1, verticalOffset: -11.2, 
+      originOffset: {
       x: -6.5,
       y: 12.5,
-    });
+    }});
   }
 }

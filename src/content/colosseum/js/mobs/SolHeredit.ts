@@ -802,7 +802,7 @@ export class SolHeredit extends Mob {
   }
 
   create3dModel() {
-    return GLTFModel.forRenderable(this, SolHereditModel, 0.02);
+    return GLTFModel.forRenderable(this, SolHereditModel, { scale: 0.02 } );
   }
 
   override get idlePoseId() {

@@ -17,7 +17,6 @@ import { SolarFlareOrb } from "./entities/SolarFlareOrb";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class ColosseumRegion extends Region {
-  wave: number;
   mapImage: HTMLImageElement = ImageLoader.createImage(ColosseumMapImage);
 
   get initialFacing() {
@@ -37,26 +36,7 @@ export class ColosseumRegion extends Region {
   }
 
   rightClickActions(): any[] {
-    if (this.wave !== 0) {
-      return [];
-    }
-
-    return [
-      {
-        text: [
-          { text: "Spawn ", fillStyle: "white" },
-          { text: "Mager", fillStyle: "red" },
-        ],
-        action: () => {
-          Trainer.clickController.yellowClick();
-          const x = Viewport.viewport.contextMenu.destinationLocation.x;
-          const y = Viewport.viewport.contextMenu.destinationLocation.y;
-          const mob = new SolHeredit(this, { x, y }, { aggro: Trainer.player });
-          mob.removableWithRightClick = true;
-          this.addMob(mob);
-        },
-      },
-    ];
+    return [];
   }
 
   initializeAndGetLoadoutType() {
