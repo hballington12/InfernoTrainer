@@ -45,16 +45,7 @@ Viewport.viewport.setPlayer(player);
 ImageLoader.onAllImagesLoaded(() => {
   MapController.controller.updateOrbsMask(player.currentStats, player.stats);
 });
-
-if (Settings.tile_markers) {
-  Settings.tile_markers
-    .map((location: Location) => {
-      return new TileMarker(selectedRegion, location, "#FF0000");
-    })
-    .forEach((tileMarker: TileMarker) => {
-      selectedRegion.addEntity(tileMarker);
-    });
-}
+TileMarker.loadAll(selectedRegion);
 
 player.perceivedLocation = player.location;
 player.destinationLocation = player.location;
