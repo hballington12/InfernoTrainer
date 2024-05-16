@@ -2,7 +2,27 @@
 
 import _ from "lodash";
 
-import { Assets, DelayedAction, EquipmentControls, GLTFModel, Collision, Region, Viewport, Location, EquipmentTypes, AttackIndicators, Mob, Pathing, Random, UnitBonuses, MeleeWeapon, Projectile, Sound, SoundCache, Trainer } from "@supalosa/oldschool-trainer-sdk";
+import {
+  Assets,
+  DelayedAction,
+  EquipmentControls,
+  GLTFModel,
+  Collision,
+  Region,
+  Viewport,
+  Location,
+  EquipmentTypes,
+  AttackIndicators,
+  Mob,
+  Pathing,
+  Random,
+  UnitBonuses,
+  MeleeWeapon,
+  Projectile,
+  Sound,
+  SoundCache,
+  Trainer,
+} from "@supalosa/oldschool-trainer-sdk";
 
 import { SolGroundSlam } from "../entities/SolGroundSlam";
 import { RingBuffer } from "../utils/RingBuffer";
@@ -408,7 +428,7 @@ export class SolHeredit extends Mob {
     this.firstSpear = true;
     this.firstShield = !this.firstShield;
     return this.phaseId < 2 ? 6 : 5;
-  }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+  }
 
   private fillRect(fromX: number, fromY: number, toX: number, toY: number, exceptRadius = null) {
     if (!this.aggro) {
@@ -448,7 +468,9 @@ export class SolHeredit extends Mob {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const delay = n / length;
-      this.region.addEntity(new SolGroundSlam(this.region, { x: fromX, y: fromY }, this, this.aggro, delay, this.tickNumber));
+      this.region.addEntity(
+        new SolGroundSlam(this.region, { x: fromX, y: fromY }, this, this.aggro, delay, this.tickNumber),
+      );
       n++;
       if (fromX === toX && fromY === toY) break;
       const e2 = 2 * err;
@@ -605,14 +627,19 @@ export class SolHeredit extends Mob {
     this.freeze(5);
     this.firstShield = true;
     this.firstSpear = true;
-    this.playAnimation(SolAnimations.Grapple);
-    SoundCache.play(GRAPPLE_CHARGE);
     const slotIdx = Math.floor(Random.get() * Object.keys(GRAPPLE_SLOTS).length);
     const slot = Object.keys(GRAPPLE_SLOTS)[slotIdx];
     const overheadText = GRAPPLE_SLOTS[slot];
     this.setOverheadText(overheadText);
 
     let didParry = false;
+
+    DelayedAction.registerDelayedAction(
+      new DelayedAction(() => {
+        this.playAnimation(SolAnimations.Grapple);
+        SoundCache.play(GRAPPLE_CHARGE);
+      }, 1),
+    );
     EquipmentControls?.instance.addEquipmentInteraction((clickedSlot) => {
       if (clickedSlot === slot) {
         didParry = true;
@@ -635,7 +662,7 @@ export class SolHeredit extends Mob {
           ),
         );
         EquipmentControls?.instance.resetEquipmentInteractions();
-      }, 3),
+      }, 4),
     );
     return 7; // only used under 75%, so always at 7
   }
@@ -802,7 +829,7 @@ export class SolHeredit extends Mob {
   }
 
   create3dModel() {
-    return GLTFModel.forRenderable(this, SolHereditModel, { scale: 0.02 } );
+    return GLTFModel.forRenderable(this, SolHereditModel, { scale: 0.02 });
   }
 
   override get idlePoseId() {
@@ -927,7 +954,7 @@ export class SolHeredit extends Mob {
   override get drawTrueTile() {
     return true;
   }
-  
+
   override drawUILayer(tickPercent, offset, context, scale, hitsplatsAbove) {
     super.drawUILayer(tickPercent, offset, context, scale, hitsplatsAbove);
     // draw overhead text on the bottom left to simulate chatbox
