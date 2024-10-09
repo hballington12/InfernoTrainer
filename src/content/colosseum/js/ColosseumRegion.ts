@@ -92,21 +92,21 @@ export class ColosseumRegion extends Region {
     // SE 34,33
     // SW 19,33
 
-    for (let xx = 19; xx <= 34; ++xx) {
-      this.addEntity(new WallMan(this, { x: xx, y: 18 }));
-      this.addEntity(new WallMan(this, { x: xx, y: 33 }));
-    }
+    // for (let xx = 19; xx <= 34; ++xx) {
+    //   this.addEntity(new WallMan(this, { x: xx, y: 18 }));
+    //   this.addEntity(new WallMan(this, { x: xx, y: 33 }));
+    // }
+    //
+    // for (let yy = 18; yy <= 33; ++yy) {
+    //   this.addEntity(new WallMan(this, { x: 19, y: yy }));
+    //   this.addEntity(new WallMan(this, { x: 34, y: yy }));
+    // }
+    // this.addEntity(new WallMan(this, { x: 33, y: 19 }));
+    // this.addEntity(new WallMan(this, { x: 20, y: 19 }));
+    // this.addEntity(new WallMan(this, { x: 33, y: 32 }));
+    // this.addEntity(new WallMan(this, { x: 20, y: 32 }));
 
-    for (let yy = 18; yy <= 33; ++yy) {
-      this.addEntity(new WallMan(this, { x: 19, y: yy }));
-      this.addEntity(new WallMan(this, { x: 34, y: yy }));
-    }
-    this.addEntity(new WallMan(this, { x: 33, y: 19 }));
-    this.addEntity(new WallMan(this, { x: 20, y: 19 }));
-    this.addEntity(new WallMan(this, { x: 33, y: 32 }));
-    this.addEntity(new WallMan(this, { x: 20, y: 32 }));
-
-    this.addMob(new SolHeredit(this, { x: 25, y: 24 }, { aggro: player }));
+    // this.addMob(new SolHeredit(this, { x: 25, y: 24 }, { aggro: player }));
 
     // Add 3d scene
     if (Settings.use3dView) {
