@@ -2,7 +2,8 @@
 
 import { Assets, Entity, CollisionType, GLTFModel, Model, LineOfSightMask } from "@supalosa/oldschool-trainer-sdk";
 
-const SceneModel = Assets.getAssetUrl("models/colosseum_partial.glb");
+// const SceneModel = Assets.getAssetUrl("models/colosseum_partial.glb");
+const SceneModel = '/wardensv2.glb';
 export class ColosseumScene extends Entity {
   get collisionType() {
     return CollisionType.NONE;
